@@ -1,40 +1,48 @@
+# Updata Time:2021.01.20 4:44pm
+# Yujijun
+
+#### load all package ####
 library(ggplot2)
 library(readxl)
 library(plyr)
-#install.packages("tidyverse")
 library(tidyverse)
 library(export)
 library(tidyfst)
-data <- read_excel("Annotation_combine.xlsx")
+library(VennDiagram)
+library(gplots)
+library(ggstatsplot)
 
-#### Data filterring ####
+#### Data cleaning ####
+data <- read_excel("./01_Oiginal_data/Annotation_combine.xlsx")
+load("./01_Oiginal_data/merge_orig_ref_filter.RData")
 selectresult=subset(data,!(is.na(DL1)&is.na(DL2)&is.na(DL3)&is.na(Matrigel1)&is.na(Matrigel2)&is.na(Matrigel3)))
 datafilter <- selectresult[!(selectresult$`Gene name` == "--" | is.na(selectresult$`Gene name`)), ]
 test1<- count_dt(datafilter,`Gene name`)%>% filter_dt(n>1)
 datadup= datafilter[which(datafilter$`Gene name` %in% test1$`Gene name`),]
 p<- c('P02770','P09605','D3ZQ25','P04937','A0A0G2KAM4','A0A096MJI4','A0A0G2KAY3','D3ZN05','A0A0G2K484','A0A0G2K8C1','M0RBV9','A0A0G2JVG3','A0A0G2K781','Q5RKJ9','P16086','Q9EQT5','A0A0G2JSQ4','A0A140TAF0','Q9JJP9')
-dat= datafilter[which(!datafilter$`Protein accession` %in% p),]
-write_excel_csv(dat,"dat.csv")
-save(dat,file = "dat.RData")
+anno_filtered = datafilter[which(!datafilter$`Protein accession` %in% p),]
+write_excel_csv(anno_filtered,"03_Output_data/output_v2/annotation_filtered.csv")
+save(anno_filtered,file = "03_Output_data/output_v2/annotation_filtered.RData")
 
 merge_orig_ref1<- count_dt(merge_orig_ref,`Gene name`)%>% filter_dt(n>1)
-merge_orig_ref2 = merge_orig_ref[which(merge_orig_ref$`Gene name` %in% merge_orig_ref1$`Gene name`),]
-merge_orig_ref_filter<-merge_orig_ref[-c(67,76,96,101,134,159),]
-write_excel_csv(merge_orig_ref_filter,"merge_orig_ref_filter.csv")
-save(merge_orig_ref_filter,file = "merge_orig_ref_filter.RData")
+merge_orig_ref2 <- merge_orig_ref[which(merge_orig_ref$`Gene name` %in% merge_orig_ref1$`Gene name`),]
+merge_orig_ref_filter <- merge_orig_ref[-c(67,76,96,101,134,159),]
+write_excel_csv(merge_orig_ref_filter,"03_Output_data/output_v2/merge_orig_ref_filter.csv")
+save(merge_orig_ref_filter,file = "03_Output_data/output_v2/merge_orig_ref_filter.RData")
 
-#### Barplot statistic about all genes ####
-dat$EX_IN <- mapvalues(dat$`Subcellular localization`,
+#### 01-Barplot for all genes####
+anno_filtered$EX_IN <- mapvalues(anno_filtered$`Subcellular localization`,
                                 from = c("cytoplasm", "cytoplasm,mitochondria","cytoplasm,nucleus", 
                                   "cytoplasm,peroxisome","cytoskeleton","endoplasmic reticulum",
                                   "Golgi apparatus","mitochondria","nucleus","peroxisome",
                                   "extracellular","plasma membrane","endoplasmic reticulum,mitochondria",
                                   "extracellular,plasma membrane","mitochondria,nucleus"),
                                 to=c("IN","IN","IN","IN","IN","IN","IN","IN","IN","IN","EX","EX","IN","EX","IN"))
-dat[which(dat$`Gene name`=='Nup214'),]$EX_IN <- 'IN'
-dat[which(dat$`Gene name`=='Lama3'),]$EX_IN <- 'EX'
+anno_filtered[which(anno_filtered$`Gene name`=='Nup214'),]$EX_IN <- 'IN'
+anno_filtered[which(anno_filtered$`Gene name`=='Lama3'),]$EX_IN <- 'EX'
+
 ###DL gene number###
-DL_mat <- dat[,c("DL1","DL2","DL3","EX_IN")]
+DL_mat <- anno_filtered[,c("DL1","DL2","DL3","EX_IN")]
 na.function <- function(DL_mat){
   DL_mat_na <- is.na(DL_mat)
   ratio_na <- rowSums(DL_mat_na)
@@ -45,7 +53,7 @@ DL_mat_na <- na.function(DL_mat)
 DL_table <- as.data.frame(table(DL_mat_na$EX_IN))
 
 ###M gene number###
-ML_mat <- dat[,c("Matrigel1","Matrigel2","Matrigel3","EX_IN")]
+ML_mat <- anno_filtered[,c("Matrigel1","Matrigel2","Matrigel3","EX_IN")]
 na.function <- function(ML_mat){
   ML_mat_na <- is.na(ML_mat)
   ratio_na <- rowSums(ML_mat_na)
@@ -59,31 +67,22 @@ colnames(Matrigel_table) <- c("Position","Freq")
 DL_table$expr <- rep("DL",2)
 Matrigel_table$expr <- rep("Matrigel",2)
 All_table <- rbind(DL_table,Matrigel_table)
-
-#Wheat1 Wheat3
-#MediumSlateBlue  DarkSlateBlue
-#Pink3  Pink4
-#Black  DimGrey
-#ce6d39  #f76a1e
 color_1 <- c("#B0C4DE","#4682B4","#CDBE70","#8B814C")
 color_2 <- c("#E9967A","#FA8072","#CDBE70","#8B814C")
 color_3 <- c("#C1CDC1","#838B83","#CDBE70","#8B814C")
 color_4 <- c("#CDC1C5","#8B8386","#CDBE70","#8B814C")
 color_5 <- c("#CDC1C5","#8B8386","#E9967A","#FA8072")
 All_table$color <- paste0(All_table$expr,"_",All_table$Position)
+## visulizaiton 
 ggplot(data = All_table,mapping = aes(x=expr,y=Freq,fill=color)) + 
   geom_bar( stat = "identity",width = 0.5) + 
   ylab("Average protein number") + 
   scale_fill_manual(values = color_1)+  
   geom_text(aes(label=Freq), position = position_stack(0.5), color = "white") + 
-  #ggtitle("Statistic about gene number") + 
-  #theme_bw() + 
-  #theme(plot.title = element_text(hjust = 0.5,size = 25)) + 
   theme(text = element_text(face = "bold")) + 
   guides(fill=guide_legend("Position")) + 
   theme(text = element_text(face = "bold")) +  
   theme(axis.text = element_text(face = "bold",size = 10)) + 
-  #theme(axis.title = element_text(face = "bold",size = 20) +
   theme(panel.background = element_blank(),
         panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
@@ -93,13 +92,8 @@ graph2ppt(file="01_barplot_for_all_gene.pptx")
 graph2pdf(file="./04_Output/Version2/01_barplot_for_all_gene.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
-#### Venn plot about in and ex ####
-#install.packages("VennDiagram")
-#install.packages("gplots")
-library(VennDiagram)
-library(gplots)
-
-DL_mat1 <- dat[,c("DL1","DL2","DL3","Gene name","EX_IN")]
+#### 02-Vennplot about IN and EX####
+DL_mat1 <- anno_filtered[,c("DL1","DL2","DL3","Gene name","EX_IN")]
 na.function <- function(DL_mat1){
   DL_mat_na <- is.na(DL_mat1)
   ratio_na <- rowSums(DL_mat_na)
@@ -108,7 +102,7 @@ na.function <- function(DL_mat1){
 }
 DL_mat_na1 <- na.function(DL_mat1)
 
-ML_mat1 <- dat[,c("Matrigel1","Matrigel2","Matrigel3","Gene name","EX_IN")]
+ML_mat1 <- anno_filtered[,c("Matrigel1","Matrigel2","Matrigel3","Gene name","EX_IN")]
 na.function <- function(ML_mat1){
   ML_mat_na <- is.na(ML_mat1)
   ratio_na <- rowSums(ML_mat_na)
@@ -139,98 +133,9 @@ graph2ppt(file="02_M_Venn_1.pptx")
 graph2pdf(file="04_Output/Version2/02_EX_Venn.pdf",aspectr=2, font = "Arial",
           width = 5, height = 5, bg = "transparent")
 
-#### Pie plot ####
-#load("category_genename.RData")
-library(ggstatsplot)
-DL_mat <- merge_orig_ref_filter[,c("DL1","DL2","DL3","Category")]
-na.function <- function(DL_mat){
-  DL_mat_na <- is.na(DL_mat)
-  ratio_na <- rowSums(DL_mat_na)
-  DL_mat_final <- DL_mat[ratio_na < 3,]
-  return(DL_mat_final)
-}
-DL_mat_naomit <- na.function(DL_mat)
-ggstatsplot::ggpiestats(DL_mat_naomit, 'Category', 
-                        results.subtitle = F, #标题中不显示统计结果
-                        factor.levels = c("ECM Regulators", "ECM Glycoproteins", "Secreted Factors","ECM-affiliated Proteins", "Proteoglycans","Collagens"),#设置标签的名称
-                        slice.label = 'percentage', #设置饼图中标签的类型（默认percentage：百分比, 还有counts：频数, both : 频数和百分比都显示）
-                        perc.k = 2, #百分比的小数位数为2
-                        direction = 1, #1为顺时针方向，-1为逆时针方向
-                        palette = 'Pastel2', #设置调色板
-                        title = 'Percent of Category for D')#设置标题 
-graph2ppt(file="03_D_pie.pptx")
-graph2pdf(file="03_D_pie.pdf",aspectr=2, font = "Arial",
-          width = 7, height = 5, bg = "transparent")
-
-
-ML_mat <- merge_orig_ref_filter[,c("Matrigel1","Matrigel2","Matrigel3","Category")]
-na.function <- function(ML_mat){
-  ML_mat_na <- is.na(ML_mat)
-  ratio_na <- rowSums(ML_mat_na)
-  ML_mat_final <- ML_mat[ratio_na < 3,]
-  return(ML_mat_final)
-}
-ML_mat_naomit <- na.function(ML_mat)
-ggstatsplot::ggpiestats(ML_mat_naomit, 'Category', 
-                        results.subtitle = F, #标题中不显示统计结果
-                        factor.levels = c("ECM Regulators", "ECM Glycoproteins", "Secreted Factors","ECM-affiliated Proteins", "Proteoglycans","Collagens"),#设置标签的名称
-                        slice.label = 'percentage', #设置饼图中标签的类型（默认percentage：百分比, 还有counts：频数, both : 频数和百分比都显示）
-                        perc.k = 2, #百分比的小数位数为2
-                        direction = 1, #1为顺时针方向，-1为逆时针方向
-                        palette = 'Pastel2', #设置调色板
-                        title = 'Percent of Category for M')#设置标题 
-graph2ppt(file="03_M_pie.pptx.pptx")
-graph2pdf(file="03_M_pie.pdf",aspectr=2, font = "Arial",
-          width = 7, height = 5, bg = "transparent")
-
-#### Plot of extracellular protein abundance ####
-data1 <- merge_orig_ref_filter[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Category","Subcellular localization")]
-data1<- data1[which(data1$`Subcellular localization`=='extracellular'),]
-
-#View(data1)
-data1$DL <- apply(data.frame(data1$DL1,data1$DL2,data1$DL3), 1, mean,na.rm=T)
-data1$Matrigel <- apply(data.frame(data1$Matrigel1,data1$Matrigel2,data1$Matrigel3), 1, mean,na.rm=T)
-
-library(reshape2)
-data2 <- melt(data1,
-              id.vars = "Category",
-              measure.vars = c("DL","Matrigel"),
-              variable.name = "condition",na.rm = T)
-#View(data2)
-#install.packages("Rmisc")
-library(Rmisc)
-
-data3 <- summarySE(data2, measurevar="value", groupvars=c("condition","Category"))
-View(data3)
-library(ggplot2)
-ggplot(data3, aes(x=Category, y=value, fill=condition)) + 
-  geom_errorbar(aes(ymin=value-se, ymax=value+se),
-                size=.3,    # Thinner lines
-                width=.2,
-                position=position_dodge(.9)) +
-  geom_bar(position=position_dodge(), stat="identity",
-           colour="black", # Use black outlines,
-           size=.3) +      # Thinner lines
-  coord_flip() +
-  #xlab("") +
-  #ylab("") + 
-  #ggtitle("extracellular protein abundance") +
-  scale_fill_manual(values = color_1[c(2,4)]) + 
-  theme_classic()+
-  theme(panel.background = element_rect(fill = "transparent",colour = NA),
-        panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        plot.background = element_rect(fill = "transparent",colour = NA))+
-  theme(legend.position="right")+ 
-  guides(fill=guide_legend("Condition")) + 
-
-#graph2ppt(file="04_extracellular protein abundance.pptx")
-graph2pdf(file="04_Output/Version2/04_Extracellular protein abundance.pdf",aspectr=2, font = "Arial",
-          width = 7, height = 5, bg = "transparent")
-
-#### Enrichment figure#### 
+#### 03-Enrichment figure for all genes#### 
 # statistic the DL emrichment
-data1 <- dat[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Cellular Component")]
+data1 <- anno_filtered[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Cellular Component")]
 names(data1)[names(data1) == "Cellular Component"] <- "Cellular.Component"
 View(data1)
 m<-c("GO:0005576","GO:0005887","GO:0005856","GO:0005739","GO:0005737","GO:0043229","GO:0005777","GO:0042579","GO:0005768","GO:0005840","GO:0009986","GO:0005694","GO:0005783","GO:0032991","GO:0005634")
@@ -252,8 +157,8 @@ a$DL_sd <- a$DL_sd/1482
 a$Matrigel <- a$Matrigel/2004
 a$Matrigel_sd <- a$Matrigel_sd/2004
 a$CC <- mapvalues(a$`Cellular.Component`,
-                       from = c("GO:0005576", "GO:0005887","GO:0005856","GO:0005739","GO:0005737","GO:0043229","GO:0005777","GO:0042579","GO:0005768","GO:0005840","GO:0009986","GO:0005694","GO:0005783","GO:0032991","GO:0005634"),
-                       to=c("Extracellular","Plasma membrane","Cytoskeleton","Mitochondria","Cytoplasm","Other intracellular organelle","Peroxisome","Microbody","Endosome","Ribosome","Cell Surface","Chromosome","Endoplasmic Reticulum","Macromolecular Complex","Nucleus"))
+                  from = c("GO:0005576", "GO:0005887","GO:0005856","GO:0005739","GO:0005737","GO:0043229","GO:0005777","GO:0042579","GO:0005768","GO:0005840","GO:0009986","GO:0005694","GO:0005783","GO:0032991","GO:0005634"),
+                  to=c("Extracellular","Plasma membrane","Cytoskeleton","Mitochondria","Cytoplasm","Other intracellular organelle","Peroxisome","Microbody","Endosome","Ribosome","Cell Surface","Chromosome","Endoplasmic Reticulum","Macromolecular Complex","Nucleus"))
 
 library(reshape2)
 data2 <- melt(a,
@@ -289,7 +194,7 @@ graph2pdf(file="04_Output/Version2/05_Cellular.Component.pdf",aspectr=2, font = 
           width = 7, height = 10, bg = "transparent")
 
 ##
-data1 <- dat[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Biological Process")]
+data1 <- anno_filtered[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Biological Process")]
 names(data1)[names(data1) == "Biological Process"] <- "Biological.Process"
 View(data1)
 m<-c("GO:0065007","GO:0009987","GO:0032502","GO:0008152","GO:0002376","GO:0000003","GO:0051179")
@@ -352,7 +257,7 @@ graph2pdf(file="04_Output/Version2/05_Biological.Process.pdf",aspectr=2, font = 
 
 
 ##
-data1 <- dat[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Molecular Function")]
+data1 <- anno_filtered[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Molecular Function")]
 names(data1)[names(data1) == "Molecular Function"] <- "Molecular.Function"
 View(data1)
 m<-c("GO:0003824","GO:0005198","GO:0060089","GO:0016209","GO:0005488")
@@ -415,7 +320,95 @@ graph2pdf(file="04_Output/Version2/05_Molecular.Function.pdf",aspectr=2, font = 
           width = 7, height = 4, bg = "transparent")
 
 
-#### Top 10 of six category ####
+#### 04-Pie plot for categories####
+DL_mat <- merge_orig_ref_filter[,c("DL1","DL2","DL3","Category")]
+na.function <- function(DL_mat){
+  DL_mat_na <- is.na(DL_mat)
+  ratio_na <- rowSums(DL_mat_na)
+  DL_mat_final <- DL_mat[ratio_na < 3,]
+  return(DL_mat_final)
+}
+DL_mat_naomit <- na.function(DL_mat)
+ggstatsplot::ggpiestats(DL_mat_naomit, 'Category', 
+                        results.subtitle = F, #标题中不显示统计结果
+                        factor.levels = c("ECM Regulators", "ECM Glycoproteins", "Secreted Factors","ECM-affiliated Proteins", "Proteoglycans","Collagens"),#设置标签的名称
+                        slice.label = 'percentage', #设置饼图中标签的类型（默认percentage：百分比, 还有counts：频数, both : 频数和百分比都显示）
+                        perc.k = 2, #百分比的小数位数为2
+                        direction = 1, #1为顺时针方向，-1为逆时针方向
+                        palette = 'Pastel2', #设置调色板
+                        title = 'Percent of Category for D')#设置标题 
+graph2ppt(file="03_D_pie.pptx")
+graph2pdf(file="03_D_pie.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 5, bg = "transparent")
+
+
+ML_mat <- merge_orig_ref_filter[,c("Matrigel1","Matrigel2","Matrigel3","Category")]
+na.function <- function(ML_mat){
+  ML_mat_na <- is.na(ML_mat)
+  ratio_na <- rowSums(ML_mat_na)
+  ML_mat_final <- ML_mat[ratio_na < 3,]
+  return(ML_mat_final)
+}
+ML_mat_naomit <- na.function(ML_mat)
+ggstatsplot::ggpiestats(ML_mat_naomit, 'Category', 
+                        results.subtitle = F, #标题中不显示统计结果
+                        factor.levels = c("ECM Regulators", "ECM Glycoproteins", "Secreted Factors","ECM-affiliated Proteins", "Proteoglycans","Collagens"),#设置标签的名称
+                        slice.label = 'percentage', #设置饼图中标签的类型（默认percentage：百分比, 还有counts：频数, both : 频数和百分比都显示）
+                        perc.k = 2, #百分比的小数位数为2
+                        direction = 1, #1为顺时针方向，-1为逆时针方向
+                        palette = 'Pastel2', #设置调色板
+                        title = 'Percent of Category for M')#设置标题 
+graph2ppt(file="03_M_pie.pptx.pptx")
+graph2pdf(file="03_M_pie.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 5, bg = "transparent")
+
+#### 05-Protein abundance for categories####
+data1 <- merge_orig_ref_filter[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Category","Subcellular localization")]
+data1<- data1[which(data1$`Subcellular localization`=='extracellular'),]
+
+#View(data1)
+data1$DL <- apply(data.frame(data1$DL1,data1$DL2,data1$DL3), 1, mean,na.rm=T)
+data1$Matrigel <- apply(data.frame(data1$Matrigel1,data1$Matrigel2,data1$Matrigel3), 1, mean,na.rm=T)
+
+library(reshape2)
+data2 <- melt(data1,
+              id.vars = "Category",
+              measure.vars = c("DL","Matrigel"),
+              variable.name = "condition",na.rm = T)
+#View(data2)
+#install.packages("Rmisc")
+library(Rmisc)
+
+data3 <- summarySE(data2, measurevar="value", groupvars=c("condition","Category"))
+View(data3)
+library(ggplot2)
+ggplot(data3, aes(x=Category, y=value, fill=condition)) + 
+  geom_errorbar(aes(ymin=value-se, ymax=value+se),
+                size=.3,    # Thinner lines
+                width=.2,
+                position=position_dodge(.9)) +
+  geom_bar(position=position_dodge(), stat="identity",
+           colour="black", # Use black outlines,
+           size=.3) +      # Thinner lines
+  coord_flip() +
+  #xlab("") +
+  #ylab("") + 
+  #ggtitle("extracellular protein abundance") +
+  scale_fill_manual(values = color_1[c(2,4)]) + 
+  theme_classic()+
+  theme(panel.background = element_rect(fill = "transparent",colour = NA),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA))+
+  theme(legend.position="right")+ 
+  guides(fill=guide_legend("Condition")) + 
+
+#graph2ppt(file="04_extracellular protein abundance.pptx")
+graph2pdf(file="04_Output/Version2/04_Extracellular protein abundance.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 5, bg = "transparent")
+
+
+#### 06-Top10 expression of six category ####
 library(ggplot2)
 library(export)
 data1 <- merge_orig_ref_filter[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Category","Gene name")]
@@ -841,7 +834,7 @@ graph2pdf(file="06_M_Collagens.pdf",aspectr=2, font = "Arial",
           width = 10, height = 2.5, bg = "transparent")
 
 
-#### Heatmap figure ####
+#### 07.1-Heatmap figure for DEgenes ####
 choosen_column <- c(1,9:16,31)
 merge_orig_ref_choosen <- merge_orig_ref_filter[,choosen_column]
 merge_na <- merge_orig_ref_choosen[!(rowSums(is.na(merge_orig_ref_choosen)) > 7),]
@@ -894,7 +887,7 @@ pheatmap(merge_na_heatmap[,1:6],cluster_cols = F,
 graph2pdf(file="04_Output/Version2/08_pheatmap_all.pdf",aspectr=2, font = "Arial",
           width = 8, height = 12, bg = "transparent")
 
-#### Just draw a part of heatmap ####
+#### 07.2-Part of heatmap for DEgenes####
 pheatmap(merge_na_heatmap[1:23,1:6],cluster_cols = F,
          cluster_rows = F,
          #annotation_col = annotation_col,
@@ -912,12 +905,12 @@ pheatmap(merge_na_heatmap[1:23,1:6],cluster_cols = F,
 #graph2ppt(file="08_Heatmap_part.pptx")
 graph2pdf(file="04_Output/Version2/08_pheatmap_collagens.pdf",aspectr=2, font = "Arial",
           width = 5, height = 10, bg = "transparent")
-#### volcano plot ####
+#### 08-Volcano plot for DEgenes ####
 library(ggplot2)
 library(ggrepel)
 source("~/Documents/Code_library/Script/Visualization/volcanoPlot.R")
-Orig_dataset_omit.na <- dat[!is.na(dat$`DL/Matrigel P value`),]
-Orig_dataset_omit.na <- dat[!is.na(dat$`DL/Matrigel Ratio`),]
+Orig_dataset_omit.na <- anno_filtered[!is.na(anno_filtered$`DL/Matrigel P value`),]
+Orig_dataset_omit.na <- anno_filtered[!is.na(anno_filtered$`DL/Matrigel Ratio`),]
 #Orig_dataset_omit.na <- Orig_dataset_omit.na[Orig_dataset_omit.na$`DL/Matrigel P value` < 0.05,]
 Orig_dataset_omit.na$logFc <- log2(Orig_dataset_omit.na$`DL/Matrigel Ratio`)
 data <- Orig_dataset_omit.na
@@ -989,3 +982,4 @@ ggplot(data=data, aes(x=logFC, y =-log10(adj.P.Val),color=significant)) +
 graph2pdf(file="04_Output/Version2/09_VolcanoPlot.pdf",aspectr=2, font = "Arial",
           width = 10, height = 8, bg = "transparent")
   
+#### 09-Ribbon plot for DLsignal but notMsignal####
