@@ -11,6 +11,7 @@ library(tidyfst)
 library(VennDiagram)
 library(gplots)
 library(ggstatsplot)
+library(RColorBrewer)
 
 #### Data cleaning ####
 data <- read_excel("./01_Oiginal_data/Annotation_combine.xlsx")
@@ -26,9 +27,14 @@ save(anno_filtered,file = "03_Output_data/output_v2/annotation_filtered.RData")
 
 merge_orig_ref1<- count_dt(merge_orig_ref,`Gene name`)%>% filter_dt(n>1)
 merge_orig_ref2 <- merge_orig_ref[which(merge_orig_ref$`Gene name` %in% merge_orig_ref1$`Gene name`),]
-merge_orig_ref_filter <- merge_orig_ref[-c(67,76,96,101,134,159),]
-write_excel_csv(merge_orig_ref_filter,"03_Output_data/output_v2/merge_orig_ref_filter.csv")
-save(merge_orig_ref_filter,file = "03_Output_data/output_v2/merge_orig_ref_filter.RData")
+merge_orig_ref_filter <- merge_orig_ref[-c(67,76,96,101,134,169),]
+choosen_column <- c(1,9:16,31)
+merge_orig_ref_choosen <- merge_orig_ref_filter[,choosen_column]
+merge_na <- merge_orig_ref_choosen[!(rowSums(is.na(merge_orig_ref_choosen)) > 7),]
+rownames(merge_orig_ref_filter) <- merge_orig_ref_filter$`Gene name`
+merge_orig_ref_filter_na <- merge_orig_ref_filter[merge_na$`Gene name`,]
+write_excel_csv(merge_orig_ref_filter_na,"03_Output_data/output_v2/merge_orig_ref_filter.csv")
+save(merge_orig_ref_filter_na,file = "03_Output_data/output_v2/merge_orig_ref_filter.RData")
 
 #### 01-Barplot for all genes####
 anno_filtered$EX_IN <- mapvalues(anno_filtered$`Subcellular localization`,
@@ -836,13 +842,8 @@ graph2pdf(file="06_M_Collagens.pdf",aspectr=2, font = "Arial",
 
 #### 07.1-Heatmap figure for DEgenes ####
 choosen_column <- c(1,9:16,31)
-merge_orig_ref_choosen <- merge_orig_ref_filter[,choosen_column]
-merge_na <- merge_orig_ref_choosen[!(rowSums(is.na(merge_orig_ref_choosen)) > 7),]
-save(merge_na,file = "category_genename_deletena.RData")
-
-load("category_genename_deletena.RData")
-merge_na <-merge_na[!duplicated(merge_na[,1], fromLast=TRUE), ] 
-merge_na_heatmap <- merge_na[,c(2:7,10)]
+merge_orig_ref_choosen <- merge_orig_ref_filter_na[,choosen_column]
+merge_na_heatmap <- merge_orig_ref_choosen[,c(2:7,10)]
 rownames(merge_na_heatmap) <- merge_na$`Gene name`
 merge_na_heatmap <- merge_na_heatmap[order(merge_na_heatmap$Category),]
 library(pheatmap)
@@ -854,8 +855,6 @@ annotation_col = data.frame(
   Condition = factor(c(rep("DL",3),rep("Matrigel",3))))
 rownames(annotation_col) <- colnames(merge_na_heatmap)[1:6]
 #source("~/Documents/Code_library/Script/scRNAseq/scRNA_Color.R")
-library("RColorBrewer")
-library(tidyverse)
 make_bold_names <- function(mat, rc_fun, rc_names) {
   bold_names <- rc_fun(mat)
   ids <- rc_names %>% match(rc_fun(mat))
@@ -869,22 +868,21 @@ make_bold_names <- function(mat, rc_fun, rc_names) {
   bold_names
 }
 
-
 pheatmap(merge_na_heatmap[,1:6],cluster_cols = F,
          cluster_rows = F,
          annotation_col = annotation_col,
          show_rownames = F,fontsize_row = 5,
          annotation_row = annotation_row,
          #color = col_heatmap2[4:20],
-         #color = colorRampPalette(c("white","#67001F"))(15),
-         gaps_row = c(23,86,124,146,155),
-         cellwidth = 45,cellheight = 4,
+         color = colorRampPalette(c("white","#67001F"))(15),
+         gaps_row = c(23,87,125,147,156),
+         cellwidth = 20,cellheight = 3,
          #main = "Heatmap of gene expression",
          na_col = "grey",
          labels_row = make_bold_names(merge_na_heatmap[,1:6],rownames,rownames(merge_na_heatmap))
          )
-#graph2ppt(file="08_Heatmap2.pptx")
-graph2pdf(file="04_Output/Version2/08_pheatmap_all.pdf",aspectr=2, font = "Arial",
+graph2ppt(file="04_Output_figure/version3/07_Heatmap2.pptx")
+graph2pdf(file="04_Output_figure/version3/08_pheatmap_all.pdf",aspectr=2, font = "Arial",
           width = 8, height = 12, bg = "transparent")
 
 #### 07.2-Part of heatmap for DEgenes####
