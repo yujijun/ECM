@@ -1,6 +1,42 @@
 # Updata Time:2021.01.20 4:44pm
 # Yujijun
 
+#### install all package ####
+install.packages("ggplot2")
+install.packages("readxl")
+install.packages("plyr")
+install.packages("tidyverse")
+install.packages("export")
+install.packages("tidyfst")
+install.packages("VennDiagram")
+install.packages("gplots")
+install.packages("ggstatsplot")
+install.packages("RColorBrewer")
+install.packages("export")
+
+####export###
+install.packages("officer")
+library(officer)
+install.packages("rvg")
+install.packages("openxlsx")
+install.packages("ggplot2")
+install.packages("flextable")
+install.packages("xtable")
+install.packages("rgl")
+install.packages("stargazer")
+install.packages("tikzDevice")
+install.packages("xml2")
+install.packages("broom")
+install.packages("devtools")
+install.packages("./export_0.2.2.mengmeng.tar.gz", repos = NULL, type = "source")
+remove.packages("export")
+remove.packages("officer")
+packageurl <- "https://cran.r-project.org/src/contrib/Archive/officer/officer_0.3.15.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
+
+remove.packages("rvg")
+packageurl <- "https://cran.r-project.org/src/contrib/Archive/rvg/rvg_0.2.1.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
 #### load all package ####
 library(ggplot2)
 library(readxl)
@@ -12,29 +48,29 @@ library(VennDiagram)
 library(gplots)
 library(ggstatsplot)
 library(RColorBrewer)
-
 #### Data cleaning ####
-data <- read_excel("./01_Oiginal_data/Annotation_combine.xlsx")
-load("./01_Oiginal_data/merge_orig_ref_filter.RData")
+setwd("/Users/sophia/SUNLOG/01 Scientific/AMMS/03-ECM/bioinformatics_figures/ag/ECM/")
+data <- read_excel("./01_Original_data/Annotation_combine.xlsx")
+load("./01_Original_data/category_genename.RData")
 selectresult=subset(data,!(is.na(DL1)&is.na(DL2)&is.na(DL3)&is.na(Matrigel1)&is.na(Matrigel2)&is.na(Matrigel3)))
 datafilter <- selectresult[!(selectresult$`Gene name` == "--" | is.na(selectresult$`Gene name`)), ]
 test1<- count_dt(datafilter,`Gene name`)%>% filter_dt(n>1)
 datadup= datafilter[which(datafilter$`Gene name` %in% test1$`Gene name`),]
 p<- c('P02770','P09605','D3ZQ25','P04937','A0A0G2KAM4','A0A096MJI4','A0A0G2KAY3','D3ZN05','A0A0G2K484','A0A0G2K8C1','M0RBV9','A0A0G2JVG3','A0A0G2K781','Q5RKJ9','P16086','Q9EQT5','A0A0G2JSQ4','A0A140TAF0','Q9JJP9')
 anno_filtered = datafilter[which(!datafilter$`Protein accession` %in% p),]
-write_excel_csv(anno_filtered,"03_Output_data/output_v2/annotation_filtered.csv")
-save(anno_filtered,file = "03_Output_data/output_v2/annotation_filtered.RData")
+write_excel_csv(anno_filtered,"03_Output_data/annotation_filtered.csv")
+save(anno_filtered,file = "03_Output_data/annotation_filtered.RData")
 
-merge_orig_ref1<- count_dt(merge_orig_ref,`Gene name`)%>% filter_dt(n>1)
-merge_orig_ref2 <- merge_orig_ref[which(merge_orig_ref$`Gene name` %in% merge_orig_ref1$`Gene name`),]
+#merge_orig_ref1<- count_dt(merge_orig_ref,`Gene name`)%>% filter_dt(n>1)
+#merge_orig_ref2 <- merge_orig_ref[which(merge_orig_ref$`Gene name` %in% merge_orig_ref1$`Gene name`),]
 merge_orig_ref_filter <- merge_orig_ref[-c(67,76,96,101,134,169),]
-choosen_column <- c(1,9:16,31)
+choosen_column <- c(1,9:16,29)
 merge_orig_ref_choosen <- merge_orig_ref_filter[,choosen_column]
 merge_na <- merge_orig_ref_choosen[!(rowSums(is.na(merge_orig_ref_choosen)) > 7),]
 rownames(merge_orig_ref_filter) <- merge_orig_ref_filter$`Gene name`
 merge_orig_ref_filter_na <- merge_orig_ref_filter[merge_na$`Gene name`,]
-write_excel_csv(merge_orig_ref_filter_na,"03_Output_data/output_v2/merge_orig_ref_filter.csv")
-save(merge_orig_ref_filter_na,file = "03_Output_data/output_v2/merge_orig_ref_filter.RData")
+write_excel_csv(merge_orig_ref_filter_na,"03_Output_data/merge_orig_ref_filter_na.csv")
+save(merge_orig_ref_filter_na,file = "03_Output_data/merge_orig_ref_filter_na.RData")
 
 #### 01-Barplot for all genes####
 anno_filtered$EX_IN <- mapvalues(anno_filtered$`Subcellular localization`,
@@ -73,11 +109,8 @@ colnames(Matrigel_table) <- c("Position","Freq")
 DL_table$expr <- rep("DL",2)
 Matrigel_table$expr <- rep("Matrigel",2)
 All_table <- rbind(DL_table,Matrigel_table)
-color_1 <- c("#B0C4DE","#4682B4","#CDBE70","#8B814C")
-color_2 <- c("#E9967A","#FA8072","#CDBE70","#8B814C")
-color_3 <- c("#C1CDC1","#838B83","#CDBE70","#8B814C")
-color_4 <- c("#CDC1C5","#8B8386","#CDBE70","#8B814C")
-color_5 <- c("#CDC1C5","#8B8386","#E9967A","#FA8072")
+color_1 <- c("#cf837e","#ab4e48","#81a3d6","#3964a3")
+color_2 <- c("#B25751","#5A80B8")
 All_table$color <- paste0(All_table$expr,"_",All_table$Position)
 ## visulizaiton 
 ggplot(data = All_table,mapping = aes(x=expr,y=Freq,fill=color)) + 
@@ -94,7 +127,7 @@ ggplot(data = All_table,mapping = aes(x=expr,y=Freq,fill=color)) +
         panel.grid.major = element_blank(),
         plot.background = element_blank())+
   theme_classic()
-graph2ppt(file="01_barplot_for_all_gene.pptx")
+#graph2ppt(file="./04_Output/Version2/01_barplot_for_all_gene.pptx")
 graph2pdf(file="./04_Output/Version2/01_barplot_for_all_gene.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
@@ -123,20 +156,20 @@ Matrigel_IN <- ML_mat_na1$`Gene name`[which(ML_mat_na1$EX_IN == "IN")]
 Matrigel_EX <- ML_mat_na1$`Gene name`[which(ML_mat_na1$EX_IN == "EX")]
 
 venn.plot <- venn.diagram(list(DL_IN=DL_IN,Matrigel_IN=Matrigel_IN),filename = NULL, height = 450, width = 450,resolution =300, 
-                          imagetype="png", col="transparent",fill=c("#4682B4","#8B814C"),alpha = 0.7, cex=0.9, cat.cex=0.9,force.unique = F)
+                          imagetype="png", col="transparent",fill=c("#ab4e48","#3964a3"),alpha = 0.7, cex=0.9, cat.cex=0.9,force.unique = F)
 
 grid.draw(venn.plot)
-graph2ppt(file="02_DL_Venn_1.pptx")
+#graph2ppt(file="./04_Output/Version2/02_IN_Venn.pptx")
 graph2pdf(file="./04_Output/Version2/02_IN_Venn.pdf",aspectr=2, font = "Arial",
           width = 5, height = 5, bg = "transparent")
 
 
 venn.plot <- venn.diagram(list(DL_EX=DL_EX,Matrigel_EX=Matrigel_EX), filename = NULL, height = 450, width = 450,resolution =300, 
-                          imagetype="png", col="transparent",fill=c("#B0C4DE","#CDBE70"),
+                          imagetype="png", col="transparent",fill=c("#cf837e","#81a3d6"),
                           alpha = 0.80, cex=0.9, cat.cex=0.9,force.unique = F)
 grid.draw(venn.plot)
-graph2ppt(file="02_M_Venn_1.pptx")
-graph2pdf(file="04_Output/Version2/02_EX_Venn.pdf",aspectr=2, font = "Arial",
+#graph2ppt(file="./04_Output/Version2/02_EX_Venn.pptx")
+graph2pdf(file="./04_Output/Version2/02_EX_Venn.pdf",aspectr=2, font = "Arial",
           width = 5, height = 5, bg = "transparent")
 
 #### 03-Enrichment figure for all genes#### 
@@ -152,7 +185,6 @@ for (gene in m){
   test$`Cellular.Component` <- gene
   a<-rbind(a,test)
 }
-View(a)
 a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
 a$DL_sd <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, sd,na.rm=T)
 a$Matrigel <- apply(data.frame(a$Matrigel1,a$Matrigel2,a$Matrigel3), 1, mean,na.rm=T)
@@ -194,15 +226,56 @@ ggplot(data2, aes(x=`CC`, y=value, fill=condition)) +
   theme(legend.position="right") + 
   theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
   theme(text = element_text(face = "bold")) + 
-  scale_fill_manual(values = color_1[c(2,4)])
-graph2ppt(file="05_Cellular.Component1.pptx")
-graph2pdf(file="04_Output/Version2/05_Cellular.Component.pdf",aspectr=2, font = "Arial",
+  scale_fill_manual(values = color_2[c(1,2)])
+#graph2ppt(file="./04_Output/Version2/03_Cellular.Component_avg.pptx")
+graph2pdf(file="./04_Output/Version2/03_Cellular.Component_avg.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 10, bg = "transparent")
+
+
+a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
+a$DL_sd <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, sd,na.rm=T)
+a$Matrigel <- apply(data.frame(a$Matrigel1,a$Matrigel2,a$Matrigel3), 1, mean,na.rm=T)
+a$Matrigel_sd <- apply(data.frame(a$Matrigel1,a$Matrigel2,a$Matrigel3), 1, sd,na.rm=T)
+a$CC <- mapvalues(a$`Cellular.Component`,
+                  from = c("GO:0005576", "GO:0005887","GO:0005856","GO:0005739","GO:0005737","GO:0043229","GO:0005777","GO:0042579","GO:0005768","GO:0005840","GO:0009986","GO:0005694","GO:0005783","GO:0032991","GO:0005634"),
+                  to=c("Extracellular","Plasma membrane","Cytoskeleton","Mitochondria","Cytoplasm","Other intracellular organelle","Peroxisome","Microbody","Endosome","Ribosome","Cell Surface","Chromosome","Endoplasmic Reticulum","Macromolecular Complex","Nucleus"))
+
+library(reshape2)
+data2 <- melt(a,
+              id.vars = c("CC","DL_sd","Matrigel_sd"),
+              measure.vars = c("DL","Matrigel"),
+              variable.name = "condition",na.rm = T)
+data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
+
+library(ggplot2)
+ggplot(data2, aes(x=`CC`, y=value, fill=condition)) + 
+  geom_errorbar(aes(ymin=value-se, ymax=value+se),
+                size=.3,    # Thinner lines
+                width=.2,
+                position=position_dodge(.9)) +
+  geom_bar(position=position_dodge(), stat="identity",
+           colour="black", # Use black outlines,
+           size=.3) +      # Thinner lines
+  coord_flip() +
+  ylab("Total protein number") +
+  xlab("") + 
+  ggtitle("Cellular Component") +
+  theme_classic()+
+  theme(panel.background = element_rect(fill = "transparent",colour = NA),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA))+
+  theme(legend.position="right") + 
+  theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
+  theme(text = element_text(face = "bold")) + 
+  scale_fill_manual(values = color_2)
+graph2pdf(file="./04_Output/Version2/03_Cellular.Component_total.pdf",aspectr=2, font = "Arial",
           width = 7, height = 10, bg = "transparent")
 
 ##
 data1 <- anno_filtered[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Biological Process")]
 names(data1)[names(data1) == "Biological Process"] <- "Biological.Process"
-View(data1)
+#View(data1)
 m<-c("GO:0065007","GO:0009987","GO:0032502","GO:0008152","GO:0002376","GO:0000003","GO:0051179")
 a<-data1[0,]
 f<-function(x) sum(!is.na(x))
@@ -211,7 +284,7 @@ for (gene in m){
   test$`Biological.Process` <- gene
   a<-rbind(a,test)
 }
-View(a)
+#View(a)
 
 a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
 a$DL_sd <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, sd,na.rm=T)
@@ -232,7 +305,7 @@ data2 <- melt(a,
               id.vars = c("BP","DL_sd","Matrigel_sd"),
               measure.vars = c("DL","Matrigel"),
               variable.name = "condition",na.rm = T)
-View(data2)
+#View(data2)
 data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
 
 library(ggplot2)
@@ -256,16 +329,55 @@ ggplot(data2, aes(x=`BP`, y=value, fill=condition)) +
   theme(legend.position="right") + 
   theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
   theme(text = element_text(face = "bold")) + 
-  scale_fill_manual(values = color_1[c(2,4)])
-#graph2ppt(file="05_Biological.Process1.pptx")
-graph2pdf(file="04_Output/Version2/05_Biological.Process.pdf",aspectr=2, font = "Arial",
+  scale_fill_manual(values = color_2)
+#graph2ppt(file="./04_Output/Version2/03_Biological.Process_avg.pptx")
+graph2pdf(file="./04_Output/Version2/03_Biological.Process_avg.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
+a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
+a$DL_sd <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, sd,na.rm=T)
+a$Matrigel <- apply(data.frame(a$Matrigel1,a$Matrigel2,a$Matrigel3), 1, mean,na.rm=T)
+a$Matrigel_sd <- apply(data.frame(a$Matrigel1,a$Matrigel2,a$Matrigel3), 1, sd,na.rm=T)
+a$BP <- mapvalues(a$`Biological.Process`,
+                  from = c("GO:0065007","GO:0051179","GO:0032502","GO:0009987","GO:0008152","GO:0002376","GO:0000003"),
+                  to=c("Biological regulation","Localization","Developmental process","Cellular process","Metabolic process","Immune system process","Reproduction"))
 
+
+library(reshape2)
+data2 <- melt(a,
+              id.vars = c("BP","DL_sd","Matrigel_sd"),
+              measure.vars = c("DL","Matrigel"),
+              variable.name = "condition",na.rm = T)
+data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
+
+library(ggplot2)
+ggplot(data2, aes(x=`BP`, y=value, fill=condition)) + 
+  geom_errorbar(aes(ymin=value-se, ymax=value+se),
+                size=.3,    # Thinner lines
+                width=.2,
+                position=position_dodge(.9)) +
+  geom_bar(position=position_dodge(), stat="identity",
+           colour="black", # Use black outlines,
+           size=.3) +      # Thinner lines
+  coord_flip() +
+  ylab("Total protein number") +
+  xlab("") + 
+  ggtitle("Biological Process") +
+  theme_classic()+
+  theme(panel.background = element_rect(fill = "transparent",colour = NA),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA))+
+  theme(legend.position="right") + 
+  theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
+  theme(text = element_text(face = "bold")) + 
+  scale_fill_manual(values = color_2)
+graph2pdf(file="./04_Output/Version2/03_Biological.Process_total.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 5, bg = "transparent")
 ##
 data1 <- anno_filtered[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Molecular Function")]
 names(data1)[names(data1) == "Molecular Function"] <- "Molecular.Function"
-View(data1)
+#View(data1)
 m<-c("GO:0003824","GO:0005198","GO:0060089","GO:0016209","GO:0005488")
 a<-data1[0,]
 f<-function(x) sum(!is.na(x))
@@ -274,7 +386,7 @@ for (gene in m){
   test$`Molecular.Function` <- gene
   a<-rbind(a,test)
 }
-View(a)
+#View(a)
 
 a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
 a$DL_sd <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, sd,na.rm=T)
@@ -284,7 +396,6 @@ a$DL <- a$DL/1482
 a$DL_sd <- a$DL_sd/1482
 a$Matrigel <- a$Matrigel/2004
 a$Matrigel_sd <- a$Matrigel_sd/2004
-
 a$MF <- mapvalues(a$`Molecular.Function`,
                   from = c("GO:0060089","GO:0016209","GO:0005488","GO:0005198","GO:0003824"),
                   to=c("Molecular transducer activity","Antioxidant activity","Binding","Structural molecule activity","Catalytic activity"))
@@ -296,7 +407,7 @@ data2 <- melt(a,
               id.vars = c("MF","DL_sd","Matrigel_sd"),
               measure.vars = c("DL","Matrigel"),
               variable.name = "condition",na.rm = T)
-View(data2)
+#View(data2)
 data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
 
 library(ggplot2)
@@ -320,14 +431,56 @@ ggplot(data2, aes(x=`MF`, y=value, fill=condition)) +
   theme(legend.position="right") + 
   theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
   theme(text = element_text(face = "bold")) + 
-  scale_fill_manual(values = color_1[c(2,4)]) 
-#graph2ppt(file="05_Molecular.Function1.pptx")
-graph2pdf(file="04_Output/Version2/05_Molecular.Function.pdf",aspectr=2, font = "Arial",
+  scale_fill_manual(values = color_2[c(1,2)]) 
+#graph2ppt(file="./04_Output/Version2/03_Molecular.Function_avg.pptx")
+graph2pdf(file="./04_Output/Version2/03_Molecular.Function_avg.pdf",aspectr=2, font = "Arial",
           width = 7, height = 4, bg = "transparent")
 
+a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
+a$DL_sd <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, sd,na.rm=T)
+a$Matrigel <- apply(data.frame(a$Matrigel1,a$Matrigel2,a$Matrigel3), 1, mean,na.rm=T)
+a$Matrigel_sd <- apply(data.frame(a$Matrigel1,a$Matrigel2,a$Matrigel3), 1, sd,na.rm=T)
+a$MF <- mapvalues(a$`Molecular.Function`,
+                  from = c("GO:0060089","GO:0016209","GO:0005488","GO:0005198","GO:0003824"),
+                  to=c("Molecular transducer activity","Antioxidant activity","Binding","Structural molecule activity","Catalytic activity"))
+
+
+
+library(reshape2)
+data2 <- melt(a,
+              id.vars = c("MF","DL_sd","Matrigel_sd"),
+              measure.vars = c("DL","Matrigel"),
+              variable.name = "condition",na.rm = T)
+#View(data2)
+data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
+
+library(ggplot2)
+ggplot(data2, aes(x=`MF`, y=value, fill=condition)) + 
+  geom_errorbar(aes(ymin=value-se, ymax=value+se),
+                size=.3,    # Thinner lines
+                width=.2,
+                position=position_dodge(.9)) +
+  geom_bar(position=position_dodge(), stat="identity",
+           colour="black", # Use black outlines,
+           size=.3) +      # Thinner lines
+  coord_flip() +
+  ylab("Total protein number") +
+  xlab("") + 
+  ggtitle("Molecular Function") +
+  theme_classic()+
+  theme(panel.background = element_rect(fill = "transparent",colour = NA),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA))+
+  theme(legend.position="right") + 
+  theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
+  theme(text = element_text(face = "bold")) + 
+  scale_fill_manual(values = color_2[c(1,2)]) 
+graph2pdf(file="./04_Output/Version2/03_Molecular.Function_total.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 4, bg = "transparent")
 
 #### 04-Pie plot for categories####
-DL_mat <- merge_orig_ref_filter[,c("DL1","DL2","DL3","Category")]
+DL_mat <- merge_orig_ref_filter_na[,c("DL1","DL2","DL3","Category")]
 na.function <- function(DL_mat){
   DL_mat_na <- is.na(DL_mat)
   ratio_na <- rowSums(DL_mat_na)
@@ -343,12 +496,12 @@ ggstatsplot::ggpiestats(DL_mat_naomit, 'Category',
                         direction = 1, #1为顺时针方向，-1为逆时针方向
                         palette = 'Pastel2', #设置调色板
                         title = 'Percent of Category for D')#设置标题 
-graph2ppt(file="03_D_pie.pptx")
-graph2pdf(file="03_D_pie.pdf",aspectr=2, font = "Arial",
+#graph2ppt(file="./04_Output/Version2/04_D_pie.pptx")
+graph2pdf(file="./04_Output/Version2/04_D_pie.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
 
-ML_mat <- merge_orig_ref_filter[,c("Matrigel1","Matrigel2","Matrigel3","Category")]
+ML_mat <- merge_orig_ref_filter_na[,c("Matrigel1","Matrigel2","Matrigel3","Category")]
 na.function <- function(ML_mat){
   ML_mat_na <- is.na(ML_mat)
   ratio_na <- rowSums(ML_mat_na)
@@ -364,12 +517,12 @@ ggstatsplot::ggpiestats(ML_mat_naomit, 'Category',
                         direction = 1, #1为顺时针方向，-1为逆时针方向
                         palette = 'Pastel2', #设置调色板
                         title = 'Percent of Category for M')#设置标题 
-graph2ppt(file="03_M_pie.pptx.pptx")
-graph2pdf(file="03_M_pie.pdf",aspectr=2, font = "Arial",
+#graph2ppt(file="./04_Output/Version2/04_M_pie.pptx.pptx")
+graph2pdf(file="./04_Output/Version2/04_M_pie.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
 #### 05-Protein abundance for categories####
-data1 <- merge_orig_ref_filter[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Category","Subcellular localization")]
+data1 <- merge_orig_ref_filter_na[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Category","Subcellular localization")]
 data1<- data1[which(data1$`Subcellular localization`=='extracellular'),]
 
 #View(data1)
@@ -386,7 +539,9 @@ data2 <- melt(data1,
 library(Rmisc)
 
 data3 <- summarySE(data2, measurevar="value", groupvars=c("condition","Category"))
-View(data3)
+data3$Category <-factor(data3$Category,levels =rev(c('Collagens','ECM Glycoproteins','Proteoglycans','ECM Regulators','ECM-affiliated Proteins','Secreted Factors')), ordered = F)
+
+#View(data3)
 library(ggplot2)
 ggplot(data3, aes(x=Category, y=value, fill=condition)) + 
   geom_errorbar(aes(ymin=value-se, ymax=value+se),
@@ -400,19 +555,18 @@ ggplot(data3, aes(x=Category, y=value, fill=condition)) +
   #xlab("") +
   #ylab("") + 
   #ggtitle("extracellular protein abundance") +
-  scale_fill_manual(values = color_1[c(2,4)]) + 
+  scale_fill_manual(values = color_2) + 
   theme_classic()+
   theme(panel.background = element_rect(fill = "transparent",colour = NA),
         panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme(legend.position="right")+ 
-  guides(fill=guide_legend("Condition")) + 
+  guides(fill=guide_legend("Condition")) 
 
-#graph2ppt(file="04_extracellular protein abundance.pptx")
-graph2pdf(file="04_Output/Version2/04_Extracellular protein abundance.pdf",aspectr=2, font = "Arial",
+#graph2ppt(file="./04_Output/Version2/05_Extracellular protein abundance.pptx")
+graph2pdf(file="./04_Output/Version2/05_Extracellular protein abundance.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
-
 
 #### 06-Top10 expression of six category ####
 library(ggplot2)
@@ -427,8 +581,8 @@ data2 <- data2[c(1:10),]
 data2$DL <- round(data2$DL,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
-  geom_bar(colour="#668B8B", fill = '#96CDCD', stat="identity",position=position_dodge(0.7),width=0.5) +
-  geom_text(aes(label = DL,x=`Gene name`),vjust=0.2,hjust=-0.1)+
+  geom_bar(fill = '#915176', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_text(aes(label = DL,x=`Gene name`,size=10),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$DL)+0.25)) +
   coord_flip()+
   xlab("") +
@@ -438,20 +592,27 @@ ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_DL_ECM Regulators2.pptx")
-graph2pdf(file="06_DL_ECM Regulators.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_DL_ECM Regulators.pptx")
+graph2pdf(file="./04_Output/Version2/06_DL_ECM Regulators.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 datann <- data1[which(data1$`Gene name`%in% c('Tgm2','Loxl1','Adamtsl4','F13b','Ambp','Serpinb6a','Hrg','Plg','Htra1','Lox')),]
-data2 <- datann[order(datann$Matrigel,decreasing = T),]
-data2$Matrigel <- round(data2$Matrigel,2)
-data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
-ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#668B8B",fill = '#d7f5f5', stat="identity",position=position_dodge(0.7),width=0.5) +
+datann$Matrigel <- round(datann$Matrigel,2)
+datann$'Gene name' <-factor(datann$'Gene name', levels = rev(c('Tgm2','Loxl1','F13b','Adamtsl4','Ambp','Serpinb6a','Hrg','Plg','Htra1','Lox')),ordered = F)
+#data2 <- datann[rank=(datann$Matrigel,decreasing = T),]
+#datann1$Matrigel <- round(datann1$Matrigel,2)
+#datann1$`Gene name` <- reorder(datann1$`Gene name`,datann$Matrigel)
+ggplot(data=datann, aes(x=`Gene name`, y=Matrigel)) +
+  geom_bar(fill = '#edc7dd', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
-  scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
+  scale_y_continuous(expand = c(0,0),limits = c(0,max(datann$Matrigel)+0.25)) +
   coord_flip()+
   xlab("") +
   ylab("") +
@@ -460,11 +621,16 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))+
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+graph2pdf(file="./04_Output/Version2/06_M_ECM Regulators_samegene.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2, bg = "transparent")
 
-graph2pdf(file="06_M_ECM Regulators_samegene.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
 
 data2 = data1[which(data1$Category =='ECM Regulators'),]
 data2 <- data2[order(data2$Matrigel,decreasing = T),]
@@ -472,7 +638,7 @@ data2 <- data2[c(1:10),]
 data2$Matrigel <- round(data2$Matrigel,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
 ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#668B8B",fill = '#BBFFFF', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#c7659e', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
   coord_flip()+
@@ -483,12 +649,16 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-
-graph2ppt(file="06_M_ECM Regulators1.pptx")
-graph2pdf(file="06_M_ECM Regulators.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_DL_ECM Regulators.pptx")
+graph2pdf(file="./04_Output/Version2/06_M_ECM Regulators.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 
 data2 = data1[which(data1$Category =='Secreted Factors'),]
@@ -497,7 +667,7 @@ data2 <- data2[c(1:8),]
 data2$DL <- round(data2$DL,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
-  geom_bar(colour="#698B22", fill = '#9ACD32', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#4b8068', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = DL,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$DL)+0.25)) +
   coord_flip()+
@@ -508,21 +678,30 @@ ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_DL_Secreted Factors1.pptx")
-graph2pdf(file="06_DL_Secreted Factors.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_DL_Secreted Factors.pptx")
+graph2pdf(file="./04_Output/Version2/06_DL_Secreted Factors.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
-datann <- data1[which(data1$`Gene name`%in% c('Megf6','Egfl7','S100a10','Pf4','Angptl6','Inhbc','Inhbe','Ccl9')),]
-data2 <- datann[order(datann$Matrigel,decreasing = T),]
-data2 <- data2[c(1:3),]
-data2$Matrigel <- round(data2$Matrigel,2)
-data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
-ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#698B22",fill = '#ddfc9d', stat="identity",position=position_dodge(0.7),width=0.5) +
+datann <- data1[which(data1$`Gene name`%in% c('Megf6','Egfl7','S100a10','Pf4','Inhbe','Inhbc','Angptl6','Ccl9')),]
+
+#datann[,c('Megf6','Egfl7','S100a10','Pf4','Angptl6','Inhbc','Inhbe','Ccl9')]
+#loc = match(c('Megf6','Egfl7','S100a10','Pf4','Angptl6','Inhbc','Inhbe','Ccl9'),datann$`Gene name`)
+#datann1<-datann[loc,]
+datann$Matrigel <- round(datann$Matrigel,2)
+#datann1$`Gene name` <- reorder(datann1$`Gene name`,datann1$Matrigel)
+datann$`Gene name`<-factor(datann$`Gene name`,levels =rev(c('Megf6','Egfl7','S100a10','Pf4','Inhbe','Inhbc','Angptl6','Ccl9')), ordered = F)
+#?factor
+ggplot(data=datann, aes(x=`Gene name`, y=Matrigel)) +
+  geom_bar(fill = '#afdac7', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
-  scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
+  scale_y_continuous(expand = c(0,0),limits = c(0,max(datann$Matrigel)+0.25)) +
   coord_flip()+
   xlab("") +
   ylab("") +
@@ -531,10 +710,15 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2pdf(file="06_M_Secreted Factors_samegene.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))+
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+graph2pdf(file="./04_Output/Version2/06_M_Secreted Factors_samegene.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2, bg = "transparent")
 
 data2 = data1[which(data1$Category =='Secreted Factors'),]
 data2 <- data2[order(data2$Matrigel,decreasing = T),]
@@ -542,7 +726,7 @@ data2 <- data2[c(1:6),]
 data2$Matrigel <- round(data2$Matrigel,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
 ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#698B22",fill = '#C0FF3E', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#74a690', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
   coord_flip()+
@@ -553,11 +737,16 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_M_Secreted Factors1.pptx")
-graph2pdf(file="06_M_Secreted Factors.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_M_Secreted Factors.pptx")
+graph2pdf(file="./04_Output/Version2/06_M_Secreted Factors.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 
 data2 = data1[which(data1$Category =='ECM-affiliated Proteins'),]
@@ -566,7 +755,7 @@ data2 <- data2[c(1:10),]
 data2$DL <- round(data2$DL,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
-  geom_bar(colour="#1c1c30", fill = "#292985", stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = "#445475", stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = DL,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$DL)+0.25)) +
   coord_flip()+
@@ -577,23 +766,27 @@ ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_DL_ECM-affiliated Proteins1.pptx")
-graph2pdf(file="06_DL_ECM-affiliated Proteins.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
-
-
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_DL_ECM-affiliated Proteins.pptx")
+graph2pdf(file="./04_Output/Version2/06_DL_ECM-affiliated Proteins.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 datann <- data1[which(data1$`Gene name`%in% c('Frem2','Anxa11','Anxa2','Anxa6','Frem1','Grem1','C1qtnf6','Anxa5','Lgals9','Anxa1')),]
-data2 <- datann[order(datann$Matrigel,decreasing = T),]
-data2 <- data2[c(1:9),]
-data2$Matrigel <- round(data2$Matrigel,2)
-data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
-ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#1818a3",fill = '#81b0f7', stat="identity",position=position_dodge(0.7),width=0.5) +
+datann$Matrigel <- round(datann$Matrigel,2)
+datann$`Gene name`<-factor(datann$`Gene name`,levels =rev(c('Frem2','Anxa11','Anxa2','Anxa6','Frem1','Grem1','C1qtnf6','Anxa5','Lgals9','Anxa1')), ordered = F)
+
+#datann$Matrigel <- round(datann$Matrigel,2)
+#datann1$`Gene name` <- reorder(datann1$`Gene name`,datann1$Matrigel)
+ggplot(data=datann, aes(x=`Gene name`, y=Matrigel)) +
+  geom_bar(fill = '#cad3e5', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
-  scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
+  scale_y_continuous(expand = c(0,0),limits = c(0,max(datann$Matrigel)+0.25)) +
   coord_flip()+
   xlab("") +
   ylab("") +
@@ -602,12 +795,15 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2pdf(file="06_M_ECM-affiliated Proteins_samegene.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
-
-
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))+
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+graph2pdf(file="./04_Output/Version2/06_M_ECM-affiliated Proteins_samegene.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2, bg = "transparent")
 
 data2 = data1[which(data1$Category =='ECM-affiliated Proteins'),]
 data2 <- data2[order(data2$Matrigel,decreasing = T),]
@@ -615,7 +811,7 @@ data2 <- data2[c(1:10),]
 data2$Matrigel <- round(data2$Matrigel,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
 ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#1818a3",fill = '#0066FF', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#5a719e', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
   coord_flip()+
@@ -626,11 +822,16 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_M_ECM-affiliated Proteins1.pptx")
-graph2pdf(file="06_M_ECM-affiliated Proteins.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_M_ECM-affiliated Proteins.pptx")
+graph2pdf(file="./04_Output/Version2/06_M_ECM-affiliated Proteins.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 data2 = data1[which(data1$Category =='Proteoglycans'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
@@ -638,7 +839,7 @@ data2 <- data2[c(1:9),]
 data2$DL <- round(data2$DL,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
-  geom_bar(colour="#153e4a", fill = '#007799', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#a36b41', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = DL,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$DL)+0.25)) +
   coord_flip()+
@@ -649,21 +850,25 @@ ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_DL_Proteoglycans1.pptx")
-graph2pdf(file="06_DL_Proteoglycans.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_DL_Proteoglycans.pptx")
+graph2pdf(file="./04_Output/Version2/06_DL_Proteoglycans.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 datann <- data1[which(data1$`Gene name`%in% c('Lum','Prg2','Prelp','Vcan','Prg3','Bgn','Prg4','Dcn','Aspn')),]
-data2 <- datann[order(datann$Matrigel,decreasing = T),]
-data2 <- data2[c(1:8),]
-data2$Matrigel <- round(data2$Matrigel,2)
-data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
-ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#0f8cba",fill = '#00BBFF', stat="identity",position=position_dodge(0.7),width=0.5) +
+datann$Matrigel <- round(datann$Matrigel,2)
+datann$`Gene name`<-factor(datann$`Gene name`,levels =rev(c('Lum','Prg2','Prelp','Vcan','Prg3','Bgn','Prg4','Dcn','Aspn')), ordered = F)
+
+ggplot(data=datann, aes(x=`Gene name`, y=Matrigel)) +
+  geom_bar(fill = '#f8cbaa', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
-  scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
+  scale_y_continuous(expand = c(0,0),limits = c(0,max(datann$Matrigel)+0.25)) +
   coord_flip()+
   xlab("") +
   ylab("") +
@@ -672,11 +877,15 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.colour = 'black', size=0.5, linetype='solid')
-graph2pdf(file="06_M_Proteoglycans_samegene.pdfy = element_line(",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
-
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))+
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+graph2pdf(file="./04_Output/Version2/06_M_Proteoglycans_samegene.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2, bg = "transparent")
 
 data2 = data1[which(data1$Category =='Proteoglycans'),]
 data2 <- data2[order(data2$Matrigel,decreasing = T),]
@@ -684,7 +893,7 @@ data2 <- data2[c(1:8),]
 data2$Matrigel <- round(data2$Matrigel,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
 ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#0f8cba",fill = '#00BBFF', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#d18956', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
   coord_flip()+
@@ -695,12 +904,16 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_M_Proteoglycans1.pptx")
-graph2pdf(file="06_M_Proteoglycans.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
-
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_M_Proteoglycans.pptx")
+graph2pdf(file="./04_Output/Version2/06_M_Proteoglycans.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 data2 = data1[which(data1$Category =='ECM Glycoproteins'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
@@ -708,7 +921,7 @@ data2 <- data2[c(1:10),]
 data2$DL <- round(data2$DL,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
-  geom_bar(colour="#8B8B00", fill = '#CDCD00', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#5b693c', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = DL,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$DL)+0.25)) +
   coord_flip()+
@@ -719,21 +932,24 @@ ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_DL_ECM Glycoproteins1.pptx")
-graph2pdf(file="06_DL_ECM Glycoproteins.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_DL_ECM Glycoproteins.pptx")
+graph2pdf(file="./04_Output/Version2/06_DL_ECM Glycoproteins.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
-datann <- data1[which(data1$`Gene name`%in% c('Papln','Emilin1','Fbn1','Dpt','Postn','Ltbp4','Tgfbi','Lama3','Ecm1','Tnc')),]
-data2 <- datann[order(datann$Matrigel,decreasing = T),]
-data2 <- data2[c(1:10),]
-data2$Matrigel <- round(data2$Matrigel,2)
-data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
-ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#8B8B00",fill = '#FFFF00', stat="identity",position=position_dodge(0.7),width=0.5) +
+datann <- data1[which(data1$`Gene name`%in% c('Papln','Tgfbi','Postn','Ltbp4','Lama3','Fbn1','Emilin1','Dpt','Ecm1','Tnc')),]
+datann$Matrigel <- round(datann$Matrigel,2)
+datann$`Gene name`<-factor(datann$`Gene name`,levels =rev(c('Papln','Tgfbi','Postn','Ltbp4','Lama3','Fbn1','Emilin1','Dpt','Ecm1','Tnc')), ordered = F)
+ggplot(data=datann, aes(x=`Gene name`, y=Matrigel)) +
+  geom_bar(fill = '#e2eec6', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
-  scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
+  scale_y_continuous(expand = c(0,0),limits = c(0,max(datann$Matrigel)+0.25)) +
   coord_flip()+
   xlab("") +
   ylab("") +
@@ -742,10 +958,15 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2pdf(file="06_M_ECM Glycoproteins_samegene.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))+
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none")
+graph2pdf(file="./04_Output/Version2/06_M_ECM Glycoproteins_samegene.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2, bg = "transparent")
 
 data2 = data1[which(data1$Category =='ECM Glycoproteins'),]
 data2 <- data2[order(data2$Matrigel,decreasing = T),]
@@ -753,7 +974,7 @@ data2 <- data2[c(1:10),]
 data2$Matrigel <- round(data2$Matrigel,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
 ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#8B8B00",fill = '#FFFF00', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#a4b381', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
   coord_flip()+
@@ -764,11 +985,16 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_M_ECM Glycoproteins1.pptx")
-graph2pdf(file="06_M_ECM Glycoproteins.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_M_ECM Glycoproteins.pptx")
+graph2pdf(file="./04_Output/Version2/06_M_ECM Glycoproteins.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 data2 = data1[which(data1$Category =='Collagens'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
@@ -776,7 +1002,7 @@ data2 <- data2[c(1:10),]
 data2$DL <- round(data2$DL,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
-  geom_bar(colour="#8B636C", fill = '#CD919E', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#a19557', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = DL,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$DL)+0.25)) +
   coord_flip()+
@@ -787,21 +1013,25 @@ ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_DL_Collagens1.pptx")
-graph2pdf(file="06_DL_Collagens.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_DL_Collagens.pptx")
+graph2pdf(file="./04_Output/Version2/06_DL_Collagens.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
-datann <- data1[which(data1$`Gene name`%in% c('Col2a1','Col1a1','Col6a1','Col3a1','Col5a2','Col14a1','Col6a2','Col6a5','Col5a3','Col4a2')),]
-data2 <- datann[order(datann$Matrigel,decreasing = T),]
-data2 <- data2[c(1:10),]
-data2$Matrigel <- round(data2$Matrigel,2)
-data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
-ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#8B636C",fill = '#FFB5C5', stat="identity",position=position_dodge(0.7),width=0.5) +
+datann <- data1[which(data1$`Gene name`%in% c('Col2a1','Col1a1','Col6a1','Col5a2','Col3a1','Col14a1','Col6a2','Col6a5','Col5a3','Col4a2')),]
+datann$Matrigel <- round(datann$Matrigel,2)
+datann$`Gene name`<-factor(datann$`Gene name`,levels =rev(c('Col2a1','Col1a1','Col6a1','Col5a2','Col3a1','Col14a1','Col6a2','Col6a5','Col5a3','Col4a2')), ordered = F)
+
+ggplot(data=datann, aes(x=`Gene name`, y=Matrigel)) +
+  geom_bar(fill = '#f8ecac', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
-  scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
+  scale_y_continuous(expand = c(0,0),limits = c(0,max(datann$Matrigel)+0.25)) +
   coord_flip()+
   xlab("") +
   ylab("") +
@@ -810,10 +1040,15 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2pdf(file="06_M_Collagens_samegene.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))+
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+graph2pdf(file="./04_Output/Version2/06_M_Collagens_samegene.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2, bg = "transparent")
 
 
 data2 = data1[which(data1$Category =='Collagens'),]
@@ -822,7 +1057,7 @@ data2 <- data2[c(1:10),]
 data2$Matrigel <- round(data2$Matrigel,2)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$Matrigel)
 ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
-  geom_bar(colour="#8B636C",fill = '#FFB5C5', stat="identity",position=position_dodge(0.7),width=0.5) +
+  geom_bar(fill = '#cfc17a', stat="identity",position=position_dodge(0.7),width=0.5) +
   geom_text(aes(label = Matrigel,x=`Gene name`),vjust=0.2,hjust=-0.1)+
   scale_y_continuous(expand = c(0,0),limits = c(0,max(data2$Matrigel)+0.25)) +
   coord_flip()+
@@ -833,12 +1068,16 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme_classic() +
-  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
-graph2ppt(file="06_M_Collagens1.pptx")
-graph2pdf(file="06_M_Collagens.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
-
+  theme(axis.line.x = element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(legend.position = "none") 
+#graph2ppt(file="./04_Output/Version2/06_M_Collagens.pptx")
+graph2pdf(file="./04_Output/Version2/06_M_Collagens.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 2.0, bg = "transparent")
 
 #### 07.1-Heatmap figure for DEgenes ####
 choosen_column <- c(1,9:16,31)
@@ -881,8 +1120,8 @@ pheatmap(merge_na_heatmap[,1:6],cluster_cols = F,
          na_col = "grey",
          labels_row = make_bold_names(merge_na_heatmap[,1:6],rownames,rownames(merge_na_heatmap))
          )
-graph2ppt(file="04_Output_figure/version3/07_Heatmap2.pptx")
-graph2pdf(file="04_Output_figure/version3/08_pheatmap_all.pdf",aspectr=2, font = "Arial",
+graph2ppt(file="04_Output_figure/version3/07_pheatmap_all.pptx")
+graph2pdf(file="04_Output_figure/version3/07_pheatmap_all.pdf",aspectr=2, font = "Arial",
           width = 8, height = 12, bg = "transparent")
 
 #### 07.2-Part of heatmap for DEgenes####
@@ -900,9 +1139,10 @@ pheatmap(merge_na_heatmap[1:23,1:6],cluster_cols = F,
          na_col = "grey",
          labels_row = make_bold_names(merge_na_heatmap[1:23,1:6],rownames,rownames(merge_na_heatmap[1:23,])),
          labels_col = make_bold_names(merge_na_heatmap[1:23,1:6],colnames,colnames(merge_na_heatmap[,1:6]))) 
-#graph2ppt(file="08_Heatmap_part.pptx")
-graph2pdf(file="04_Output/Version2/08_pheatmap_collagens.pdf",aspectr=2, font = "Arial",
+graph2ppt(file="/04_Output/Version2/07_Heatmap_collagens.pptx")
+graph2pdf(file="./04_Output/Version2/07_pheatmap_collagens.pdf",aspectr=2, font = "Arial",
           width = 5, height = 10, bg = "transparent")
+
 #### 08-Volcano plot for DEgenes ####
 library(ggplot2)
 library(ggrepel)
@@ -916,7 +1156,7 @@ data$logFC <- data$logFc
 data$pval <- data$`DL/Matrigel P value`
 data$P.Value <- data$pval
 data$gene <- data$`Gene name`
-data_subset <- data[data$`Gene name` %in% unique(merge_orig_ref_filter$`Gene name`),]
+data_subset <- data[data$`Gene name` %in% unique(merge_orig_ref_filter_na$`Gene name`),]
 
 ggplot(data=data, aes(x=logFC, y =-log10(pval))) +
   ## 三个部分分别画点
@@ -949,7 +1189,7 @@ library(ggrepel)
 # data$gene <- rownames(data)
 data$adj.P.Val <- data$P.Value
 data_subset$adj.P.Val <- data_subset$P.Value
-data_subset <- data[data$`Gene name` %in% unique(merge_orig_ref_filter$`Gene name`),]
+data_subset <- data[data$`Gene name` %in% unique(merge_orig_ref_filter_na$`Gene name`),]
 data_subset <- data_subset %>% subset(-log10(adj.P.Val) > -log10(0.05) & abs(logFC) > 1)
 ggplot(data=data, aes(x=logFC, y =-log10(adj.P.Val),color=significant)) +
   geom_point(alpha=0.8, size=1.2,col="black")+
@@ -977,7 +1217,100 @@ ggplot(data=data, aes(x=logFC, y =-log10(adj.P.Val),color=significant)) +
 #coord_fixed(ratio = 2)
 #library(export)
 ## 导成PPT可编辑的格式
-graph2pdf(file="04_Output/Version2/09_VolcanoPlot.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version2/08_VolcanoPlot.pdf",aspectr=2, font = "Arial",
           width = 10, height = 8, bg = "transparent")
   
 #### 09-Ribbon plot for DLsignal but notMsignal####
+
+####10-Another pie plot for subcell####
+DL_mat <- anno_filtered[,c("DL1","DL2","DL3","Subcellular localization")]
+na.function <- function(DL_mat){
+  DL_mat_na <- is.na(DL_mat)
+  ratio_na <- rowSums(DL_mat_na)
+  DL_mat_final <- DL_mat[ratio_na < 3,]
+  return(DL_mat_final)
+}
+DL_mat_naomit <- na.function(DL_mat)
+data<-DL_mat_naomit[,"Subcellular localization"]
+data[which(data$`Subcellular localization`=='extracellular'),]$`Subcellular localization` <- 'Extracellular'
+data[which(data$`Subcellular localization`%in% 
+             c('cytoplasm',
+               'cytoskeleton',
+               'mitochondria',
+               'endoplasmic reticulum',
+               'peroxisome',
+               'Golgi apparatus',
+               'cytoplasm,peroxisome',
+               'cytoplasm,mitochondria',
+               'endoplasmic reticulum,mitochondria')),]$`Subcellular localization` <- 'Cytoplasm'
+data[which(data$`Subcellular localization`=='nucleus'),]$`Subcellular localization` <- 'Nucleus'
+data[which(data$`Subcellular localization`=='plasma membrane'),]$`Subcellular localization` <- 'Piasmamembrane'
+data[which(data$`Subcellular localization`%in% 
+             c("cytoplasm,nucleus",
+               "mitochondria,nucleus",
+               "extracellular,plasma membrane")),]$`Subcellular localization` <- 'Others'
+data_group<- group_by(data, `Subcellular localization`)
+data_GroupByID<- summarise(data_group,count = n())
+data_GroupByID$per<- round(data_GroupByID$count/sum(data_GroupByID$count),3)*100
+data_GroupByID$label <- paste(as.character(data_GroupByID$per),"%", data_GroupByID$`Subcellular localization`, sep = "")
+#data_GroupByID$label <- factor(data_GroupByID$label,levels = c("15% Extracellular","4% Piasmamembrane","30.1% Nucleus","45.5% Cytoplasm","5.4% Others"), ordered = T)
+ggplot(data_GroupByID, aes(x = 2, y = count, fill = label)) +
+  geom_bar(width = 1, size = 1, color = "white", stat = "identity") +
+  theme(axis.text = element_blank()) + 
+  theme(axis.ticks = element_blank()) + 
+  coord_polar(theta = "y", start = 0)+
+  labs(x = '', y = '', title = '') + 
+  theme_void()+
+  theme(legend.position = "bottom",legend.direction = "vertical") +
+  scale_fill_manual(name="Percentage",values = c('#B25751','#5A80B8','#A1BA66','#7C659E','#65AAC3')) +
+  xlim(0.5, 2.5)
+#graph2ppt(file="./04_Output/Version2/10_D_pie_subcell.pptx")
+graph2pdf(file="./04_Output/Version2/10_D_pie_subcell.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 5, bg = "transparent")
+
+ML_mat <- anno_filtered[,c("Matrigel1","Matrigel1","Matrigel1","Subcellular localization")]
+na.function <- function(ML_mat){
+  ML_mat_na <- is.na(ML_mat)
+  ratio_na <- rowSums(ML_mat_na)
+  ML_mat_final <- ML_mat[ratio_na < 3,]
+  return(ML_mat_final)
+}
+ML_mat_naomit <- na.function(ML_mat)
+data<-ML_mat_naomit[,"Subcellular localization"]
+data[which(data$`Subcellular localization`=='extracellular'),]$`Subcellular localization` <- 'Extracellular'
+data[which(data$`Subcellular localization` %in% 
+             c('cytoplasm',
+               'cytoskeleton',
+               'mitochondria',
+               'endoplasmic reticulum',
+               'peroxisome',
+               'Golgi apparatus',
+               'cytoplasm,peroxisome',
+               'cytoplasm,mitochondria',
+               'endoplasmic reticulum,mitochondria')),]$`Subcellular localization` <- 'Cytoplasm'
+data[which(data$`Subcellular localization`=='nucleus'),]$`Subcellular localization` <- 'Nucleus'
+data[which(data$`Subcellular localization`=='plasma membrane'),]$`Subcellular localization` <- 'Piasmamembrane'
+data[which(data$`Subcellular localization` %in% 
+             c("cytoplasm,nucleus",
+               "mitochondria,nucleus",
+               "extracellular,plasma membrane")),]$`Subcellular localization` <- 'Others'
+
+data_group<- group_by(data, `Subcellular localization`)
+data_GroupByID<- summarise(data_group,count = n())
+data_GroupByID$per<- round(data_GroupByID$count/sum(data_GroupByID$count),3)*100
+data_GroupByID$label <- paste(as.character(data_GroupByID$per),"% " , data_GroupByID$`Subcellular localization`, sep = "")
+data_GroupByID$label <-factor(data_GroupByID$label,levels =c("12.4% Extracellular","4% Piasmamembrane","33.8% Nucleus","44.4% Cytoplasm","5.5% Others"), ordered = T)
+ggplot(data_GroupByID, aes(x = 2, y = count, fill = label)) +
+  geom_bar(width = 1, size = 1, color = "white", stat = "identity") +
+  theme(axis.text = element_blank()) + 
+  theme(axis.ticks = element_blank()) + 
+  coord_polar(theta = "y", start = 0)+
+  labs(x = '', y = '', title = '') + 
+  theme_void()+
+  theme(legend.position = "bottom",legend.direction = "vertical") +
+  scale_fill_manual(name="Percentage",values = c('#B25751','#5A80B8','#A1BA66','#7C659E','#65AAC3')) +
+  xlim(0.5, 2.5)
+#graph2ppt(file="./04_Output/Version2/10_M_pie_subcell.pptx")
+graph2pdf(file="./04_Output/Version2/10_M_pie_subcell.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 5, bg = "transparent")
+          
