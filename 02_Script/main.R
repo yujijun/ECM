@@ -14,8 +14,8 @@ library(ggstatsplot)
 library(RColorBrewer)
 
 #### Data cleaning ####
-data <- read_excel("./01_Oiginal_data/Annotation_combine.xlsx")
-load("./01_Oiginal_data/merge_orig_ref_filter.RData")
+data <- read_excel("./01_Original_data/Annotation_combine.xlsx")
+load("./01_Original_data/merge_orig_ref_filter.RData")
 selectresult=subset(data,!(is.na(DL1)&is.na(DL2)&is.na(DL3)&is.na(Matrigel1)&is.na(Matrigel2)&is.na(Matrigel3)))
 datafilter <- selectresult[!(selectresult$`Gene name` == "--" | is.na(selectresult$`Gene name`)), ]
 test1<- count_dt(datafilter,`Gene name`)%>% filter_dt(n>1)
@@ -846,9 +846,12 @@ merge_orig_ref_choosen <- merge_orig_ref_filter_na[,choosen_column]
 merge_na_heatmap <- merge_orig_ref_choosen[,c(2:7,10)]
 rownames(merge_na_heatmap) <- merge_na$`Gene name`
 merge_na_heatmap <- merge_na_heatmap[order(merge_na_heatmap$Category),]
+merge_na_heatmap <- merge_na_heatmap[c(1:87,148:156,88:147,157:167),]
+merge_na_heatmap$Category <- factor(merge_na_heatmap$Category, levels = c("Collagens","ECM Glycoproteins","Proteoglycans",
+                                                                          "ECM Regulators","ECM-affiliated Proteins","Secreted Factors"))
 library(pheatmap)
 annotation_row = data.frame(
-  category = factor(merge_na_heatmap$Category)
+  category = merge_na_heatmap$Category
 )
 rownames(annotation_row) <- rownames(merge_na_heatmap)
 annotation_col = data.frame(
@@ -867,49 +870,87 @@ make_bold_names <- function(mat, rc_fun, rc_names) {
     )
   bold_names
 }
-
+heatmap_col <- c("#05030d","#f9f998")
 pheatmap(merge_na_heatmap[,1:6],cluster_cols = F,
          cluster_rows = F,
          annotation_col = annotation_col,
          show_rownames = F,fontsize_row = 5,
          annotation_row = annotation_row,
-         #color = col_heatmap2[4:20],
          color = colorRampPalette(c("white","#67001F"))(15),
-         gaps_row = c(23,87,125,147,156),
+         gaps_row = c(23,87,96,134,156),
          cellwidth = 20,cellheight = 3,
          #main = "Heatmap of gene expression",
          na_col = "grey",
+         border_color = "black",
          labels_row = make_bold_names(merge_na_heatmap[,1:6],rownames,rownames(merge_na_heatmap))
          )
-graph2ppt(file="04_Output_figure/version3/07_Heatmap2.pptx")
-graph2pdf(file="04_Output_figure/version3/08_pheatmap_all.pdf",aspectr=2, font = "Arial",
-          width = 8, height = 12, bg = "transparent")
+#graph2ppt(file="04_Output_figure/version3/07_Heatmap2.pptx")
+graph2pdf(file="04_Output_figure/version3/08_pheatmap_all_v1.pdf",aspectr=2, font = "Arial",
+          width = 5, height = 12, bg = "transparent")
 
 #### 07.2-Part of heatmap for DEgenes####
 pheatmap(merge_na_heatmap[1:23,1:6],cluster_cols = F,
          cluster_rows = F,
          #annotation_col = annotation_col,
-         show_rownames = T,fontsize_row = 8,
+         show_rownames = T,fontsize_row = 6,
          #fontsize = 10,
          #annotation_row = annotation_row,
          #color = col_heatmap2[4:20],
-         #color = colorRampPalette(c("white","#67001F"))(15),
+         color = colorRampPalette(c("white","#67001F"))(15),
          # gaps_row = c(23,86,124,145,154),
-         cellwidth = 25,cellheight = 8,
+         cellwidth = 20,cellheight = 6,
+         border_color = "black",
          #main = "Heatmap of Collagens",
          na_col = "grey",
          labels_row = make_bold_names(merge_na_heatmap[1:23,1:6],rownames,rownames(merge_na_heatmap[1:23,])),
          labels_col = make_bold_names(merge_na_heatmap[1:23,1:6],colnames,colnames(merge_na_heatmap[,1:6]))) 
-#graph2ppt(file="08_Heatmap_part.pptx")
-graph2pdf(file="04_Output/Version2/08_pheatmap_collagens.pdf",aspectr=2, font = "Arial",
-          width = 5, height = 10, bg = "transparent")
+graph2pdf(file="04_Output_figure/Version3/08_pheatmap_collagens_v1.pdf",aspectr=2, font = "Arial",
+          width = 3, height = 4, bg = "transparent")
+
+pheatmap(merge_na_heatmap[24:87,1:6],cluster_cols = F,
+         cluster_rows = F,
+         #annotation_col = annotation_col,
+         show_rownames = T,fontsize_row = 6,
+         #fontsize = 10,
+         #annotation_row = annotation_row,
+         #color = col_heatmap2[4:20],
+         color = colorRampPalette(c("white","#67001F"))(15),
+         # gaps_row = c(23,86,124,145,154),
+         cellwidth = 20,cellheight = 6,
+         border_color = "black",
+         #main = "Heatmap of Collagens",
+         na_col = "grey",
+         labels_row = make_bold_names(merge_na_heatmap[24:87,1:6],rownames,rownames(merge_na_heatmap[1:23,])),
+         labels_col = make_bold_names(merge_na_heatmap[24:87,1:6],colnames,colnames(merge_na_heatmap[,1:6]))) 
+graph2pdf(file="04_Output_figure/Version3/08_pheatmap_ECM_Glycoproteins_v1.pdf",aspectr=2, font = "Arial",
+          width = 3, height = 7, bg = "transparent")
+
+pheatmap(merge_na_heatmap[88:96,1:6],cluster_cols = F,
+         cluster_rows = F,
+         #annotation_col = annotation_col,
+         show_rownames = T,fontsize_row = 6,
+         #fontsize = 10,
+         #annotation_row = annotation_row,
+         #color = col_heatmap2[4:20],
+         color = colorRampPalette(c("white","#67001F"))(15),
+         # gaps_row = c(23,86,124,145,154),
+         cellwidth = 20,cellheight = 6,
+         border_color = "black",
+         #main = "Heatmap of Collagens",
+         na_col = "grey",
+         labels_row = make_bold_names(merge_na_heatmap[88:96,1:6],rownames,rownames(merge_na_heatmap[1:23,])),
+         labels_col = make_bold_names(merge_na_heatmap[88:96,1:6],colnames,colnames(merge_na_heatmap[,1:6]))) 
+graph2pdf(file="04_Output_figure/Version3/08_pheatmap_Proteoglycans.pdf",aspectr=2, font = "Arial",
+          width = 3, height = 2, bg = "transparent")
+
+
 #### 08-Volcano plot for DEgenes ####
 library(ggplot2)
 library(ggrepel)
 source("~/Documents/Code_library/Script/Visualization/volcanoPlot.R")
+load("03_Output_data/output_v2/annotation_filtered.RData")
 Orig_dataset_omit.na <- anno_filtered[!is.na(anno_filtered$`DL/Matrigel P value`),]
 Orig_dataset_omit.na <- anno_filtered[!is.na(anno_filtered$`DL/Matrigel Ratio`),]
-#Orig_dataset_omit.na <- Orig_dataset_omit.na[Orig_dataset_omit.na$`DL/Matrigel P value` < 0.05,]
 Orig_dataset_omit.na$logFc <- log2(Orig_dataset_omit.na$`DL/Matrigel Ratio`)
 data <- Orig_dataset_omit.na
 data$logFC <- data$logFc
@@ -918,26 +959,26 @@ data$P.Value <- data$pval
 data$gene <- data$`Gene name`
 data_subset <- data[data$`Gene name` %in% unique(merge_orig_ref_filter$`Gene name`),]
 
-ggplot(data=data, aes(x=logFC, y =-log10(pval))) +
-  ## 三个部分分别画点
-  geom_point(data=subset(data,abs(data$logFC) <= 1),aes(size=abs(logFC)),color="black",alpha=0.1) +
-  geom_point(data=subset(data,data$P.Value<0.05 & data$logFC > 1),aes(size=abs(logFC)),color="red",alpha=0.2) +
-  geom_point(data=subset(data,data$P.Value<0.05 & data$logFC < -1),aes(size=abs(logFC)),color="green",alpha=0.2) +
-  ## 画线
-  geom_hline(yintercept = -log10(0.05),lty=4,lwd=0.6,alpha=0.8)+
-  geom_vline(xintercept = c(1,-1),lty=4,lwd=0.6,alpha=0.8)+
-  ## 主题
-  theme_bw()+
-  theme(panel.border = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black"))+
-  labs(x="log2 (fold change)",y="-log10 (q-value)")+
-  theme(plot.title = element_text(hjust = 0.5))+
-  theme(legend.position='none')+
-  ## 标签
-  #geom_text_repel(data=subset(data, abs(logFC) > 6), aes(label=gene),col="black",alpha = 0.8)
-  geom_text_repel(data=data_subset, aes(label=gene),col="black",alpha = 0.8)
+# ggplot(data=data, aes(x=logFC, y =-log10(pval))) +
+#   ## 三个部分分别画点
+#   geom_point(data=subset(data,abs(data$logFC) <= 1),aes(size=abs(logFC)),color="black",alpha=0.1) +
+#   geom_point(data=subset(data,data$P.Value<0.05 & data$logFC > 1),aes(size=abs(logFC)),color="red",alpha=0.2) +
+#   geom_point(data=subset(data,data$P.Value<0.05 & data$logFC < -1),aes(size=abs(logFC)),color="green",alpha=0.2) +
+#   ## 画线
+#   geom_hline(yintercept = -log10(0.05),lty=4,lwd=0.6,alpha=0.8)+
+#   geom_vline(xintercept = c(1,-1),lty=4,lwd=0.6,alpha=0.8)+
+#   ## 主题
+#   theme_bw()+
+#   theme(panel.border = element_blank(),
+#         panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(),
+#         axis.line = element_line(colour = "black"))+
+#   labs(x="log2 (fold change)",y="-log10 (q-value)")+
+#   theme(plot.title = element_text(hjust = 0.5))+
+#   theme(legend.position='none')+
+#   ## 标签
+#   #geom_text_repel(data=subset(data, abs(logFC) > 6), aes(label=gene),col="black",alpha = 0.8)
+#   geom_text_repel(data=data_subset, aes(label=gene),col="black",alpha = 0.8)
 
 #换一种风格
 library(ggplot2)
@@ -950,11 +991,20 @@ library(ggrepel)
 data$adj.P.Val <- data$P.Value
 data_subset$adj.P.Val <- data_subset$P.Value
 data_subset <- data[data$`Gene name` %in% unique(merge_orig_ref_filter$`Gene name`),]
-data_subset <- data_subset %>% subset(-log10(adj.P.Val) > -log10(0.05) & abs(logFC) > 1)
+data_subset <- data_subset %>% subset(-log10(adj.P.Val) > -log10(0.01) & abs(logFC) > 1)
+rownames(data_subset) <- data_subset$`Gene name`
+data_subset_list <- list()
+for (i in 1:6){
+  gene_i <- rownames(merge_na_heatmap[which(merge_na_heatmap$Category == levels(merge_na_heatmap$Category)[i]),])
+  data_subset_list[[i]] <- data_subset[which(data_subset$`Gene name` %in% gene_i),]
+  print(dim(data_subset_list[[i]]))
+}
+subset_color <- c("#f8ecac","#edc7dd","#f8cbaa",
+                  "#cad3e5","#e2eec6","#afdac7")
 ggplot(data=data, aes(x=logFC, y =-log10(adj.P.Val),color=significant)) +
-  geom_point(alpha=0.8, size=1.2,col="black")+
-  geom_point(data=subset(data, logFC > 1 & adj.P.Val < 0.05),alpha=0.6, size=1.2,col="red")+
-  geom_point(data=subset(data, logFC < -1&adj.P.Val < 0.05),alpha=0.6, size=1.2,col="blue")+
+  geom_point(alpha=0.8, size=0.2,col="black")+
+  geom_point(data=subset(data, logFC > 1 & adj.P.Val < 0.05),alpha=0.8, size=0.2,col="red")+
+  geom_point(data=subset(data, logFC < -1&adj.P.Val < 0.05),alpha=0.8, size=0.2,col="blue")+
   labs(x="log2 (fold change)")+
   theme(plot.title = element_text(hjust = 0.4))+
   geom_hline(yintercept = -log10(0.05),lty=4,lwd=0.6,alpha=0.5)+
@@ -972,12 +1022,111 @@ ggplot(data=data, aes(x=logFC, y =-log10(adj.P.Val),color=significant)) +
   # geom_point(data=subset(data, abs(logFC) >= 6 & adj.P.Val < 0.05),alpha=0.8, size=3,col="green")+
   # geom_text_repel(data=subset(data, abs(logFC) > 6 & adj.P.Val < 0.05),
   #                 aes(label=gene),col="black",alpha = 0.8)
-  geom_point(data=data_subset,alpha=0.8, size=3,col="#9370DB")+
-  geom_text_repel(data=data_subset,aes(label=gene),col="black",alpha = 0.8)
+  geom_point(data=data_subset_list[[1]],alpha=0.85, size=1.5,col=subset_color[1])+
+  geom_point(data=data_subset_list[[2]],alpha=0.85, size=1.5,col=subset_color[2])+
+  geom_point(data=data_subset_list[[3]],alpha=0.85, size=1.5,col=subset_color[3])+
+  geom_point(data=data_subset_list[[4]],alpha=0.85, size=1.5,col=subset_color[4])+
+  geom_point(data=data_subset_list[[5]],alpha=0.85, size=1.5,col=subset_color[5])+
+  geom_point(data=data_subset_list[[6]],alpha=0.85, size=1.5,col=subset_color[6])+
+  geom_text_repel(data=data_subset,aes(label=gene),col="black",alpha = 0.8,size=3)
+
 #coord_fixed(ratio = 2)
 #library(export)
 ## 导成PPT可编辑的格式
-graph2pdf(file="04_Output/Version2/09_VolcanoPlot.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="04_Output_figure/Version3/09_VolcanoPlot.pdf",aspectr=2, font = "Arial",
           width = 10, height = 8, bg = "transparent")
   
 #### 09-Ribbon plot for DLsignal but notMsignal####
+library(readxl)
+sheet2 <- readxl::read_xlsx("./01_Original_data/DL_noMl.xlsx",sheet = 2)
+sheet2 <- sheet2[!is.na(sheet2$`Gene name`),]
+sheet2 <- sheet2[-grep("--",sheet2$`Gene name`),]
+sheet2 <- sheet2[,c(1,3)]
+
+regu_cell <- readxl::read_xlsx("01_Original_data/DL_noMl.xlsx",sheet = 3)
+regu_expr <- readxl::read_xlsx("01_Original_data/DL_noMl.xlsx",sheet = 4)
+transfer <- readxl::read_xlsx("01_Original_data/DL_noMl.xlsx",sheet = 5)
+sign_transduct <- readxl::read_xlsx("01_Original_data/DL_noMl.xlsx",sheet = 6)
+metabolism <- readxl::read_xlsx("01_Original_data/DL_noMl.xlsx",sheet = 7)
+biosynthesis <- readxl::read_xlsx("01_Original_data/DL_noMl.xlsx",sheet = 8)
+
+regu_cell$class <- rep("Cell_regulation",nrow(regu_cell))
+regu_expr$class <- rep("Expression_regulation",nrow(regu_expr))
+transfer$class <- rep("Transfer",nrow(transfer))
+sign_transduct$class <- rep("Signal_transduction",nrow(sign_transduct))
+metabolism$class <- rep("Metabolism",nrow(metabolism))
+biosynthesis$class <- rep("Biosynthesis",nrow(biosynthesis))
+
+colnames(regu_cell)[1] <- "function"
+colnames(regu_expr)[1] <- "function"
+colnames(transfer)[1] <- "function"
+colnames(sign_transduct)[1] <- "function"
+colnames(metabolism)[1] <- "function"
+colnames(biosynthesis)[1] <- "function"
+All_df <- do.call("rbind", list(regu_cell, regu_expr, transfer,
+                                sign_transduct,metabolism,biosynthesis))
+All_df <- All_df[,c(5,1,2)]
+colnames(All_df) <- c("class","func","Protein_name")
+All_df_count <- All_df %>% 
+  group_by(class,func) %>% 
+  count()
+All_df_class <- All_df %>%
+  group_by((class)) %>% 
+  count()
+# nrow(regu_cell) + nrow(regu_expr) +nrow(transfer) + 
+# nrow(sign_transduct) + nrow(metabolism) + nrow(biosynthesis)
+
+#create node and edge:
+nodes <- data.frame(
+  ID = c(All_df_class$`(class)`,All_df_count$func),
+  x = c(rep(1,nrow(All_df_class)),rep(2,nrow(All_df_count))),
+  col=c(cluster_col[1:6],rep(NA,35)),
+  labels = c(All_df_class$`(class)`,All_df_count$func),
+  stringsAsFactors = F
+)
+
+
+edges <- All_df_count
+colnames(edges) <- c("N1","N2","Value")
+nodes <- as.data.frame(nodes)
+edges <- as.data.frame(edges)
+r <- makeRiver( nodes, edges )
+op <- par(cex=0.8)
+riverplot( r,srt=0,lty=0,textcel=1,
+           nodewidth = 1,node_margin = 0.1,
+           cex=0.2,plot_area = 0.9)
+graph2pdf(file="04_Output_figure/Version3/10_riverPlot.pdf",aspectr=2, font = "Arial",
+          width = 10, height = 8, bg = "transparent")
+
+edges_first <- All_df_class %>% add_column(Gene = rep("Genes_onlyinDL",6),.before=1)
+edges_first <- edges_first %>% add_column(ID = 1:6,.after = 3)
+colnames(edges_first) <- colnames(edges)
+edges_all <- rbind(edges_first,edges)
+edges_all$ID <- 1:nrow(edges_all)
+
+nodes_all <- nodes %>% add_row(ID="Genes_onlyinDL",x=1,col="yellow",labels="Genes_onlyinDL",.before=1)
+nodes_all$x <- c(1,rep(2,6),rep(3,35))
+
+edges_all <- as.data.frame(edges_all)
+nodes_all <- as.data.frame(nodes_all)
+
+
+r_all <- makeRiver(nodes_all, edges_all)
+op <- par(cex=0.8)
+riverplot( r_all,srt=0,lty=0,textcel=1,
+           nodewidth = 1,node_margin = 0.1,
+           cex=0.2,plot_area = 0.9)
+
+graph2pdf(file="04_Output_figure/Version3/10_riverPlot_v2.pdf",aspectr=2, font = "Arial",
+          width = 10, height = 8, bg = "transparent")
+library(RColorBrewer)
+display.brewer.all()
+set3= brewer.pal(n=6,name = "Set3")
+nodes_all$col[2:7] <- set3
+r_all <- makeRiver(nodes_all, edges_all)
+op <- par(cex=0.8)
+riverplot( r_all,srt=0,lty=0,textcel=1,
+           nodewidth = 1,node_margin = 0.1,
+           cex=0.2,plot_area = 0.9)
+graph2pdf(file="04_Output_figure/Version3/10_riverPlot_v3.pdf",aspectr=2, font = "Arial",
+          width = 10, height = 8, bg = "transparent")
