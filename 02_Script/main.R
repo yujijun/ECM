@@ -1,6 +1,3 @@
-# Updata Time:2021.01.20 4:44pm
-# Yujijun
-
 #### install all package ####
 install.packages("ggplot2")
 install.packages("readxl")
@@ -95,40 +92,44 @@ DL_mat_na <- na.function(DL_mat)
 DL_table <- as.data.frame(table(DL_mat_na$EX_IN))
 
 ###M gene number###
-ML_mat <- anno_filtered[,c("Matrigel1","Matrigel2","Matrigel3","EX_IN")]
-na.function <- function(ML_mat){
-  ML_mat_na <- is.na(ML_mat)
-  ratio_na <- rowSums(ML_mat_na)
-  ML_mat_final <- ML_mat[ratio_na < 3,]
-  return(ML_mat_final)
-}
-ML_mat_na <- na.function(ML_mat)
-Matrigel_table <- as.data.frame(table(ML_mat_na$EX_IN))
-colnames(DL_table) <- c("Position","Freq")
-colnames(Matrigel_table) <- c("Position","Freq")
-DL_table$expr <- rep("DL",2)
-Matrigel_table$expr <- rep("Matrigel",2)
-All_table <- rbind(DL_table,Matrigel_table)
-color_1 <- c("#cf837e","#ab4e48","#81a3d6","#3964a3")
-color_2 <- c("#B25751","#5A80B8")
-All_table$color <- paste0(All_table$expr,"_",All_table$Position)
-## visulizaiton 
-ggplot(data = All_table,mapping = aes(x=expr,y=Freq,fill=color)) + 
-  geom_bar( stat = "identity",width = 0.5) + 
-  ylab("Average protein number") + 
-  scale_fill_manual(values = color_1)+  
-  geom_text(aes(label=Freq), position = position_stack(0.5), color = "white") + 
-  theme(text = element_text(face = "bold")) + 
-  guides(fill=guide_legend("Position")) + 
-  theme(text = element_text(face = "bold")) +  
-  theme(axis.text = element_text(face = "bold",size = 10)) + 
-  theme(panel.background = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        plot.background = element_blank())+
-  theme_classic()
+  ML_mat <- anno_filtered[,c("Matrigel1","Matrigel2","Matrigel3","EX_IN")]
+  na.function <- function(ML_mat){
+    ML_mat_na <- is.na(ML_mat)
+    ratio_na <- rowSums(ML_mat_na)
+    ML_mat_final <- ML_mat[ratio_na < 3,]
+    return(ML_mat_final)
+  }
+  ML_mat_na <- na.function(ML_mat)
+  Matrigel_table <- as.data.frame(table(ML_mat_na$EX_IN))
+  colnames(DL_table) <- c("Position","Freq")
+  colnames(Matrigel_table) <- c("Position","Freq")
+  DL_table$expr <- rep("DL",2)
+  Matrigel_table$expr <- rep("Matrigel",2)
+  All_table <- rbind(DL_table,Matrigel_table)
+  color_1 <- c("#cf837e","#ab4e48","#81a3d6","#3964a3")
+  color_2 <- c("#B25751","#5A80B8")
+  All_table$color <- paste0(All_table$expr,"_",All_table$Position)
+  ## visulizaiton 
+  ggplot(data = All_table,mapping = aes(x=expr,y=Freq,fill=color)) + 
+    geom_bar( stat = "identity",width = 0.5) + 
+    ylab("Average protein number") + 
+    scale_fill_manual(values = color_1)+  
+    geom_text(aes(label=Freq), position = position_stack(0.5), color = "black") + 
+    theme(text = element_text(face = "bold")) + 
+    guides(fill=guide_legend("Position")) + 
+    theme(text = element_text(face = "bold")) +  
+    theme(axis.text = element_text(face = "bold",size = 10)) + 
+    theme(panel.background = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_blank(),
+          plot.background = element_blank())+
+    theme(axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+    theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+    theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+    theme(axis.text.x = element_text(face = "bold",size = 10))
+  
 #graph2ppt(file="./04_Output/Version2/01_barplot_for_all_gene.pptx")
-graph2pdf(file="./04_Output/Version2/01_barplot_for_all_gene.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/01_barplot_for_all_gene.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
 #### 02-Vennplot about IN and EX####
@@ -156,27 +157,26 @@ Matrigel_IN <- ML_mat_na1$`Gene name`[which(ML_mat_na1$EX_IN == "IN")]
 Matrigel_EX <- ML_mat_na1$`Gene name`[which(ML_mat_na1$EX_IN == "EX")]
 
 venn.plot <- venn.diagram(list(DL_IN=DL_IN,Matrigel_IN=Matrigel_IN),filename = NULL, height = 450, width = 450,resolution =300, 
-                          imagetype="png", col="transparent",fill=c("#ab4e48","#3964a3"),alpha = 0.7, cex=0.9, cat.cex=0.9,force.unique = F)
+                          imagetype="png", col="transparent",fill=c("#ab4e48","#3964a3"),alpha = 0.8, cex=0.9,cat.cex = 0.9, fontface = "bold",cat.fontface = "bold",force.unique = F)
 
 grid.draw(venn.plot)
 #graph2ppt(file="./04_Output/Version2/02_IN_Venn.pptx")
-graph2pdf(file="./04_Output/Version2/02_IN_Venn.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/02_IN_Venn.pdf",aspectr=2, font = "Arial",
           width = 5, height = 5, bg = "transparent")
 
 
 venn.plot <- venn.diagram(list(DL_EX=DL_EX,Matrigel_EX=Matrigel_EX), filename = NULL, height = 450, width = 450,resolution =300, 
-                          imagetype="png", col="transparent",fill=c("#cf837e","#81a3d6"),
-                          alpha = 0.80, cex=0.9, cat.cex=0.9,force.unique = F)
+                          imagetype="png", col="transparent",fill=c("#cf837e","#81a3d6"),,alpha = 0.8, cex=0.9,cat.cex = 0.9, fontface = "bold",cat.fontface = "bold",force.unique = F)
 grid.draw(venn.plot)
 #graph2ppt(file="./04_Output/Version2/02_EX_Venn.pptx")
-graph2pdf(file="./04_Output/Version2/02_EX_Venn.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/02_EX_Venn.pdf",aspectr=2, font = "Arial",
           width = 5, height = 5, bg = "transparent")
 
 #### 03-Enrichment figure for all genes#### 
 # statistic the DL emrichment
 data1 <- anno_filtered[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Cellular Component")]
 names(data1)[names(data1) == "Cellular Component"] <- "Cellular.Component"
-View(data1)
+#View(data1)
 m<-c("GO:0005576","GO:0005887","GO:0005856","GO:0005739","GO:0005737","GO:0043229","GO:0005777","GO:0042579","GO:0005768","GO:0005840","GO:0009986","GO:0005694","GO:0005783","GO:0032991","GO:0005634")
 a<-data1[0,]
 f<-function(x) sum(!is.na(x))
@@ -198,6 +198,9 @@ a$CC <- mapvalues(a$`Cellular.Component`,
                   from = c("GO:0005576", "GO:0005887","GO:0005856","GO:0005739","GO:0005737","GO:0043229","GO:0005777","GO:0042579","GO:0005768","GO:0005840","GO:0009986","GO:0005694","GO:0005783","GO:0032991","GO:0005634"),
                   to=c("Extracellular","Plasma membrane","Cytoskeleton","Mitochondria","Cytoplasm","Other intracellular organelle","Peroxisome","Microbody","Endosome","Ribosome","Cell Surface","Chromosome","Endoplasmic Reticulum","Macromolecular Complex","Nucleus"))
 
+
+
+
 library(reshape2)
 data2 <- melt(a,
               id.vars = c("CC","DL_sd","Matrigel_sd"),
@@ -205,8 +208,12 @@ data2 <- melt(a,
               variable.name = "condition",na.rm = T)
 data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
 
+test<-factor(a[sort(a$DL-a$Matrigel,index.return=TRUE,decreasing=TRUE)$ix,]$CC)
+data2<-data2[order(factor(data2$CC, levels = test)),]
+data2$CC <- factor(data2$CC, levels=unique(as.character(data2$CC)) )
+
 library(ggplot2)
-ggplot(data2, aes(x=`CC`, y=value, fill=condition)) + 
+ggplot(data2, aes(x=CC, y=value, fill=condition)) + 
   geom_errorbar(aes(ymin=value-se, ymax=value+se),
                 size=.3,    # Thinner lines
                 width=.2,
@@ -228,7 +235,7 @@ ggplot(data2, aes(x=`CC`, y=value, fill=condition)) +
   theme(text = element_text(face = "bold")) + 
   scale_fill_manual(values = color_2[c(1,2)])
 #graph2ppt(file="./04_Output/Version2/03_Cellular.Component_avg.pptx")
-graph2pdf(file="./04_Output/Version2/03_Cellular.Component_avg.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/03_Cellular.Component_avg.pdf",aspectr=2, font = "Arial",
           width = 7, height = 10, bg = "transparent")
 
 
@@ -246,6 +253,10 @@ data2 <- melt(a,
               measure.vars = c("DL","Matrigel"),
               variable.name = "condition",na.rm = T)
 data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
+
+test<-factor(a[sort(a$DL-a$Matrigel,index.return=TRUE,decreasing=TRUE)$ix,]$CC)
+data2<-data2[order(factor(data2$CC, levels = test)),]
+data2$CC <- factor(data2$CC, levels=unique(as.character(data2$CC)))
 
 library(ggplot2)
 ggplot(data2, aes(x=`CC`, y=value, fill=condition)) + 
@@ -269,7 +280,7 @@ ggplot(data2, aes(x=`CC`, y=value, fill=condition)) +
   theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
   theme(text = element_text(face = "bold")) + 
   scale_fill_manual(values = color_2)
-graph2pdf(file="./04_Output/Version2/03_Cellular.Component_total.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/03_Cellular.Component_total.pdf",aspectr=2, font = "Arial",
           width = 7, height = 10, bg = "transparent")
 
 ##
@@ -308,6 +319,11 @@ data2 <- melt(a,
 #View(data2)
 data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
 
+test<-factor(a[sort(a$DL-a$Matrigel,index.return=TRUE,decreasing=TRUE)$ix,]$BP)
+data2<-data2[order(factor(data2$BP, levels = test)),]
+data2$BP <- factor(data2$BP, levels=unique(as.character(data2$BP)) )
+
+
 library(ggplot2)
 ggplot(data2, aes(x=`BP`, y=value, fill=condition)) + 
   geom_errorbar(aes(ymin=value-se, ymax=value+se),
@@ -331,7 +347,7 @@ ggplot(data2, aes(x=`BP`, y=value, fill=condition)) +
   theme(text = element_text(face = "bold")) + 
   scale_fill_manual(values = color_2)
 #graph2ppt(file="./04_Output/Version2/03_Biological.Process_avg.pptx")
-graph2pdf(file="./04_Output/Version2/03_Biological.Process_avg.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/03_Biological.Process_avg.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
 a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
@@ -349,6 +365,11 @@ data2 <- melt(a,
               measure.vars = c("DL","Matrigel"),
               variable.name = "condition",na.rm = T)
 data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
+
+test<-factor(a[sort(a$DL-a$Matrigel,index.return=TRUE,decreasing=TRUE)$ix,]$BP)
+data2<-data2[order(factor(data2$BP, levels = test)),]
+data2$BP <- factor(data2$BP, levels=unique(as.character(data2$BP)) )
+
 
 library(ggplot2)
 ggplot(data2, aes(x=`BP`, y=value, fill=condition)) + 
@@ -372,7 +393,7 @@ ggplot(data2, aes(x=`BP`, y=value, fill=condition)) +
   theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
   theme(text = element_text(face = "bold")) + 
   scale_fill_manual(values = color_2)
-graph2pdf(file="./04_Output/Version2/03_Biological.Process_total.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/03_Biological.Process_total.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 ##
 data1 <- anno_filtered[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Molecular Function")]
@@ -410,6 +431,11 @@ data2 <- melt(a,
 #View(data2)
 data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
 
+test<-factor(a[sort(a$DL-a$Matrigel,index.return=TRUE,decreasing=TRUE)$ix,]$MF)
+data2<-data2[order(factor(data2$MF, levels = test)),]
+data2$MF <- factor(data2$MF, levels=unique(as.character(data2$MF)) )
+
+
 library(ggplot2)
 ggplot(data2, aes(x=`MF`, y=value, fill=condition)) + 
   geom_errorbar(aes(ymin=value-se, ymax=value+se),
@@ -433,7 +459,7 @@ ggplot(data2, aes(x=`MF`, y=value, fill=condition)) +
   theme(text = element_text(face = "bold")) + 
   scale_fill_manual(values = color_2[c(1,2)]) 
 #graph2ppt(file="./04_Output/Version2/03_Molecular.Function_avg.pptx")
-graph2pdf(file="./04_Output/Version2/03_Molecular.Function_avg.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/03_Molecular.Function_avg.pdf",aspectr=2, font = "Arial",
           width = 7, height = 4, bg = "transparent")
 
 a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
@@ -453,6 +479,10 @@ data2 <- melt(a,
               variable.name = "condition",na.rm = T)
 #View(data2)
 data2$se <- ifelse(data2$condition=="DL",data2$DL_sd,data2$Matrigel_sd)
+
+test<-factor(a[sort(a$DL-a$Matrigel,index.return=TRUE,decreasing=TRUE)$ix,]$MF)
+data2<-data2[order(factor(data2$MF, levels = test)),]
+data2$MF <- factor(data2$MF, levels=unique(as.character(data2$MF)) )
 
 library(ggplot2)
 ggplot(data2, aes(x=`MF`, y=value, fill=condition)) + 
@@ -476,7 +506,7 @@ ggplot(data2, aes(x=`MF`, y=value, fill=condition)) +
   theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 15)) + 
   theme(text = element_text(face = "bold")) + 
   scale_fill_manual(values = color_2[c(1,2)]) 
-graph2pdf(file="./04_Output/Version2/03_Molecular.Function_total.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/03_Molecular.Function_total.pdf",aspectr=2, font = "Arial",
           width = 7, height = 4, bg = "transparent")
 
 #### 04-Pie plot for categories####
@@ -487,6 +517,7 @@ na.function <- function(DL_mat){
   DL_mat_final <- DL_mat[ratio_na < 3,]
   return(DL_mat_final)
 }
+
 DL_mat_naomit <- na.function(DL_mat)
 ggstatsplot::ggpiestats(DL_mat_naomit, 'Category', 
                         results.subtitle = F, #标题中不显示统计结果
@@ -496,8 +527,8 @@ ggstatsplot::ggpiestats(DL_mat_naomit, 'Category',
                         direction = 1, #1为顺时针方向，-1为逆时针方向
                         palette = 'Pastel2', #设置调色板
                         title = 'Percent of Category for D')#设置标题 
-#graph2ppt(file="./04_Output/Version2/04_D_pie.pptx")
-graph2pdf(file="./04_Output/Version2/04_D_pie.pdf",aspectr=2, font = "Arial",
+graph2ppt(file="./04_Output/Version3/04_D_pie.pptx")
+graph2pdf(file="./04_Output/Version3/04_D_pie.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
 
@@ -509,6 +540,7 @@ na.function <- function(ML_mat){
   return(ML_mat_final)
 }
 ML_mat_naomit <- na.function(ML_mat)
+
 ggstatsplot::ggpiestats(ML_mat_naomit, 'Category', 
                         results.subtitle = F, #标题中不显示统计结果
                         factor.levels = c("ECM Regulators", "ECM Glycoproteins", "Secreted Factors","ECM-affiliated Proteins", "Proteoglycans","Collagens"),#设置标签的名称
@@ -517,9 +549,40 @@ ggstatsplot::ggpiestats(ML_mat_naomit, 'Category',
                         direction = 1, #1为顺时针方向，-1为逆时针方向
                         palette = 'Pastel2', #设置调色板
                         title = 'Percent of Category for M')#设置标题 
-#graph2ppt(file="./04_Output/Version2/04_M_pie.pptx.pptx")
-graph2pdf(file="./04_Output/Version2/04_M_pie.pdf",aspectr=2, font = "Arial",
+graph2ppt(file="./04_Output/Version3/04_M_pie.pptx.pptx")
+graph2pdf(file="./04_Output/Version3/04_M_pie.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
+
+library(dplyr)
+data_group<- group_by(DL_mat_naomit, Category)
+DL_count<- summarise(group_by(DL_mat_naomit, Category),count = n())
+DL_count$name ="DL"
+data_group<- group_by(ML_mat_naomit, Category)
+ML_count<- summarise(group_by(ML_mat_naomit, Category),count = n())
+ML_count$name ="ML"
+
+ML_DL_count <- rbind(ML_count,DL_count)
+#ML_DL_count$Category <- factor(rev(ML_DL_count$Category),ordered = T)
+
+ML_DL_count<-ML_DL_count[order(factor(ML_DL_count$Category, levels = c("Collagens","ECM Glycoproteins","Proteoglycans","ECM-affiliated Proteins","ECM Regulators","Secreted Factors"))),]
+ML_DL_count$Category <- factor(ML_DL_count$Category, levels=unique(as.character(ML_DL_count$Category)) )
+
+ggplot(ML_DL_count, aes(x=name, y=count, fill=Category))+
+  geom_bar(width = 0.5, stat = "identity")+
+  coord_flip()+
+  scale_fill_manual(name="Category",values = rev(c("#afdac7","#edc7dd","#cad3e5","#f8cbaa","#e2eec6","#f8ecac")))+
+theme(panel.background = element_rect(fill = "transparent",colour = NA),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      plot.background = element_rect(fill = "transparent",colour = NA))+
+  theme_classic() +
+  theme(axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.x = element_text(face = "bold",size = 10)) 
+graph2pdf(file="./04_Output/Version3/04_ML_DL_pie.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 3, bg = "transparent")
+
 
 #### 05-Protein abundance for categories####
 data1 <- merge_orig_ref_filter_na[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Category","Subcellular localization")]
@@ -562,10 +625,15 @@ ggplot(data3, aes(x=Category, y=value, fill=condition)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme(legend.position="right")+ 
-  guides(fill=guide_legend("Condition")) 
+  guides(fill=guide_legend("Condition")) +
+  theme_classic() +
+  theme(axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.x = element_text(face = "bold",size = 10)) 
 
 #graph2ppt(file="./04_Output/Version2/05_Extracellular protein abundance.pptx")
-graph2pdf(file="./04_Output/Version2/05_Extracellular protein abundance.pdf",aspectr=2, font = "Arial",
+graph2pdf(file="./04_Output/Version3/05_Extracellular protein abundance.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
 #### 06-Top10 expression of six category ####
@@ -1253,7 +1321,9 @@ data_group<- group_by(data, `Subcellular localization`)
 data_GroupByID<- summarise(data_group,count = n())
 data_GroupByID$per<- round(data_GroupByID$count/sum(data_GroupByID$count),3)*100
 data_GroupByID$label <- paste(as.character(data_GroupByID$per),"%", data_GroupByID$`Subcellular localization`, sep = "")
-#data_GroupByID$label <- factor(data_GroupByID$label,levels = c("15% Extracellular","4% Piasmamembrane","30.1% Nucleus","45.5% Cytoplasm","5.4% Others"), ordered = T)
+data_GroupByID$`Subcellular localization` <- factor(data_GroupByID$`Subcellular localization`)
+#data_GroupByID$label <- factor(data_GroupByID$label,levels =c("15% Extracellular","4% Piasmamembrane","30.1% Nucleus","45.5% Cytoplasm","5.4% Others"), ordered = T)
+DL_count<- data.frame(count=data_GroupByID$count,name ='DL',label = data_GroupByID$`Subcellular localization`)
 ggplot(data_GroupByID, aes(x = 2, y = count, fill = label)) +
   geom_bar(width = 1, size = 1, color = "white", stat = "identity") +
   theme(axis.text = element_blank()) + 
@@ -1264,8 +1334,8 @@ ggplot(data_GroupByID, aes(x = 2, y = count, fill = label)) +
   theme(legend.position = "bottom",legend.direction = "vertical") +
   scale_fill_manual(name="Percentage",values = c('#B25751','#5A80B8','#A1BA66','#7C659E','#65AAC3')) +
   xlim(0.5, 2.5)
-#graph2ppt(file="./04_Output/Version2/10_D_pie_subcell.pptx")
-graph2pdf(file="./04_Output/Version2/10_D_pie_subcell.pdf",aspectr=2, font = "Arial",
+graph2ppt(file="./04_Output/Version3/10_D_pie_subcell.pptx")
+graph2pdf(file="./04_Output/Version3/10_D_pie_subcell1.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
 
 ML_mat <- anno_filtered[,c("Matrigel1","Matrigel1","Matrigel1","Subcellular localization")]
@@ -1297,9 +1367,12 @@ data[which(data$`Subcellular localization` %in%
 
 data_group<- group_by(data, `Subcellular localization`)
 data_GroupByID<- summarise(data_group,count = n())
+
 data_GroupByID$per<- round(data_GroupByID$count/sum(data_GroupByID$count),3)*100
 data_GroupByID$label <- paste(as.character(data_GroupByID$per),"% " , data_GroupByID$`Subcellular localization`, sep = "")
-data_GroupByID$label <-factor(data_GroupByID$label,levels =c("12.4% Extracellular","4% Piasmamembrane","33.8% Nucleus","44.4% Cytoplasm","5.5% Others"), ordered = T)
+data_GroupByID$`Subcellular localization` <- factor(data_GroupByID$`Subcellular localization`)
+#data_GroupByID$label <- factor(data_GroupByID$label,levels =c("12.4% Extracellular","4% Piasmamembrane","33.8% Nucleus","44.4% Cytoplasm","5.5% Others"), ordered = T)
+ML_count<- data.frame(count=data_GroupByID$count,name ='ML',label = data_GroupByID$`Subcellular localization`)
 ggplot(data_GroupByID, aes(x = 2, y = count, fill = label)) +
   geom_bar(width = 1, size = 1, color = "white", stat = "identity") +
   theme(axis.text = element_blank()) + 
@@ -1310,7 +1383,25 @@ ggplot(data_GroupByID, aes(x = 2, y = count, fill = label)) +
   theme(legend.position = "bottom",legend.direction = "vertical") +
   scale_fill_manual(name="Percentage",values = c('#B25751','#5A80B8','#A1BA66','#7C659E','#65AAC3')) +
   xlim(0.5, 2.5)
-#graph2ppt(file="./04_Output/Version2/10_M_pie_subcell.pptx")
-graph2pdf(file="./04_Output/Version2/10_M_pie_subcell.pdf",aspectr=2, font = "Arial",
+graph2ppt(file="./04_Output/Version3/10_M_pie_subcell.pptx")
+graph2pdf(file="./04_Output/Version3/10_M_pie_subcell1.pdf",aspectr=2, font = "Arial",
           width = 7, height = 5, bg = "transparent")
-          
+
+Barplot
+ML_DL_count <- rbind(ML_count,DL_count)
+ggplot(ML_DL_count, aes(x=name, y=count, fill=label))+
+  geom_bar(width = 0.5, stat = "identity")+
+  scale_fill_manual(values = c("#786699",'#A55D53','#6280B2','#75A9BF','#A6BA6F')) +
+  coord_flip()+
+  theme(panel.background = element_rect(fill = "transparent",colour = NA),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        plot.background = element_rect(fill = "transparent",colour = NA))+
+  theme_classic() +
+  theme(axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
+  theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid')) + 
+  theme(axis.text.x = element_text(face = "bold",size = 10)) 
+graph2pdf(file="./04_Output/Version3/10_M_L_pie_subcell.pdf",aspectr=2, font = "Arial",
+          width = 7, height = 3, bg = "transparent")
+
