@@ -1138,3 +1138,72 @@ graph2pdf(file="04_Output_figure/Version3/10_riverPlot_v3.pdf",aspectr=2, font =
 #col <- c("#2F4F4F","#8B2323","#8B3E2F","#8B3626")
 
 
+
+#### 10-GeomSplitViolin in Glycoproteins####
+## 重构数据集
+library(readxl)
+library(Rmisc)
+ECM_Glyco_function <- read_excel("./4.1_ECM数据分析项目_原始数据_20201231/Fig5核心分类_ECM糖蛋白与蛋白聚糖_生物学过程分类_v2.0_20210521.xlsx")
+ECM_Glyco_function <- ECM_Glyco_function[,c(1,2)]
+colnames(ECM_Glyco_function) <- c("Function","genename")
+ECM_Glyco_function$Function[grep(pattern = "TGF",ECM_Glyco_function$Function)] <- "TGFβ"
+load("/Users/yujijun/Documents/work/4_ECM数据分析项目_20201120_/4.3_ECM数据分析项目_输出结果_20210120/output_v1/category_genename_deletena.RData")
+ECM_Glyco_expre <- merge_na %>% filter(Category == "ECM Glycoproteins")
+
+ECM_Glyco_all <- right_join(x = ECM_Glyco_function,
+                            y = ECM_Glyco_expre,
+                            by = c("genename" = "Gene name"))
+ECM_Glyco_all <- ECM_Glyco_all[!is.na(ECM_Glyco_all$Function),1:8]
+
+#### wigth to long
+ECM_Glyco_all_long <- ECM_Glyco_all %>%  
+  pivot_longer(
+    cols = DL1:Matrigel3,
+    names_to = "sample",
+    values_to = "expression"
+  )
+ECM_Glyco_all_long$group <- "Matrigel"
+ECM_Glyco_all_long$group[grep(pattern = "DL",x=ECM_Glyco_all_long$sample)] <- "DL"
+ECM_Glyco_all_long <- ECM_Glyco_all_long[!is.na(ECM_Glyco_all_long$expression),]
+ECM_Glyco_all_long_summary <- summarySE(ECM_Glyco_all_long, 
+                                        measurevar="expression", 
+                                        groupvars=c("Function","genename","group"))
+
+source("/Users/yujijun/Documents/Code_library/Script/Visualization/geom_split_violin.R")
+if(T){
+  mytheme <- theme(plot.title = element_text(size = 12,color="black",hjust = 0.5),
+                   axis.title = element_text(size = 12,color ="black"), 
+                   axis.text = element_text(size= 12,color = "black"),
+                   panel.grid.minor.y = element_blank(),
+                   panel.grid.minor.x = element_blank(),
+                   axis.text.x = element_text(angle = 45, hjust = 1 ),
+                   panel.grid=element_blank(),
+                   legend.position = "right",
+                   legend.text = element_text(size= 12),
+                   legend.title= element_text(size= 12)
+  ) 
+}
+
+# 自行调整下面的参数
+library(ggpubr)  
+gene_split_violin <- ggplot(ECM_Glyco_all_long,aes(x= Function,y= expression,fill= group))+
+  geom_split_violin(trim= F,color="white",scale = "area") + #绘制分半的小提琴图
+  geom_point(data = ECM_Glyco_all_long_summary,aes(x= Function, y= expression),pch=19,
+             position=position_dodge(0.5),size= 1)+ #绘制均值为点图
+  # geom_errorbar(data = ECM_Glyco_all_long_summary,aes(ymin = expression-ci, ymax= expression+ci), 
+  #               width= 0.05, 
+  #               position= position_dodge(0.5), 
+  #               color="black",
+  #               alpha = 0.8,
+  #               size= 0.5) +
+  scale_fill_manual(values = c("#56B4E9", "#E69F00"))+ 
+  #scale_fill_manual(values = col_convert) + 
+  labs(y=("gene expression"),x=NULL,title = "ECM Glygoproteins") + 
+  theme_bw()+ mytheme +
+  stat_compare_means(aes(group = group),
+                     label = "p.signif",
+                     method = "anova",
+                     label.y = max(ECM_Glyco_all_long$expression),
+                     hide.ns = T)
+save(ECM_Glyco_all_long,file = "4.3_ECM数据分析项目_输出结果_20210120/output_v3/01_ECM_Glyco_all_long_20210518_v1.RData")
+save(ECM_Glyco_all_long_summary,file = "4.3_ECM数据分析项目_输出结果_20210120/output_v3/01_ECM_Glyco_all_long_summary_20210518_v1.RData")
