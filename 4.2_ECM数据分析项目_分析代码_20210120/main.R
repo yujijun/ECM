@@ -52,11 +52,15 @@ width2 <- 7.01
 height = 3.35
 col_convert <- c("#B2182B","#2166AC")
 color_4 <- c("#C58680","#B2182B","#87A3D2","#2166AC")
-figure_path <- "./4.4_ECM数据分析项目_图片输出_20210120/version7_last/"
+color_category <- c(brewer.pal(n = 8, name = "Pastel2")[1:6])
+names(color_category) <- c("secreted_factors","proteoglycans","ECM-affiliated",
+                           "regulators","glycoproteins","collagens")
+figure_path <- "./4.4_ECM数据分析项目_图片输出_20210120/version8_last_V2_20210531/"
 output_path <-"./4.3_ECM数据分析项目_输出结果_20210120/output_last/"
 
 #### 03 Data input and cleaning ####
-data <- read_excel("./4.1_ECM数据分析项目_原始数据_20201231/Annotation_combine.xlsx")
+data <- read_excel("./4.1_ECM数据分析项目_原始数据_20201231/Table1 proteomics of DL-ECM vs Matrigel.xlsx")
+#data <- read_excel("./4.1_ECM数据分析项目_原始数据_20201231/Annotation_combine.xlsx")
 load("./4.1_ECM数据分析项目_原始数据_20201231/merge_orig_ref_filter.RData")
 selectresult=subset(data,!(is.na(DL1)&is.na(DL2)&is.na(DL3)&is.na(Matrigel1)&is.na(Matrigel2)&is.na(Matrigel3)))
 datafilter <- selectresult[!(selectresult$`Gene name` == "--" | is.na(selectresult$`Gene name`)), ]
@@ -115,7 +119,7 @@ ML_mat_na <- na.function(ML_mat)
 Matrigel_table <- as.data.frame(table(ML_mat_na$EX_IN))
 colnames(DL_table) <- c("Position","Freq")
 colnames(Matrigel_table) <- c("Position","Freq")
-DL_table$expr <- rep("DL",2)
+DL_table$expr <- rep("DL-ECM",2)
 Matrigel_table$expr <- rep("Matrigel",2)
 All_table <- rbind(DL_table,Matrigel_table)
 All_table$color <- paste0(All_table$expr,"_",All_table$Position)
@@ -132,7 +136,7 @@ figure_name <- paste0(figure_path,"01_barplot_forallgene.pdf")
 graph2pdf(x = plot01_barplot, file=figure_name,
           font = "Arial",
           width = width, 
-          height = height, 
+          height = height/2, 
           bg = "transparent")
 
 ## 2-Vennplot about IN and EX####
@@ -245,7 +249,8 @@ plot03_CC_avg <- ggplot(data2, aes(x=CC, y=value, fill=condition)) +
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme(plot.title = element_text(hjust = 0.5,face = "bold",size = 12)) + 
   scale_fill_manual(values = color_4[c(2,4)]) + 
-  mytheme
+  mytheme + 
+  theme(legend.position = "none")
 figure_name <- paste0(figure_path,"03_Cellular.Component.avg.pdf")
 graph2pdf(x=plot03_CC_avg,
           file=figure_name,
@@ -290,7 +295,8 @@ plot03.CC.total <- ggplot(data2, aes(x=`CC`, y=value, fill=condition)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   scale_fill_manual(values = color_4[c(2,4)]) + 
-  mytheme
+  mytheme + 
+  theme(legend.position = "none")
 figure_name <- paste0(figure_path,"03_Cellular.Component.total.pdf")
 graph2pdf(x= plot03.CC.total,file=figure_name,
           font = "Arial",
@@ -349,13 +355,14 @@ plot03.BP.precentage <- ggplot(data2, aes(x=`BP`, y=value, fill=condition)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   theme(text = element_text(face = "bold")) + 
-  scale_fill_manual(values = color_4[c(2,4)]) + mytheme
+  scale_fill_manual(values = color_4[c(2,4)]) + mytheme + 
+  theme(legend.position = "none")
 figure_name <- paste0(figure_path,"03_Biological.Process.avg.pdf")
 graph2pdf(x=plot03.BP.precentage,
           file=figure_name,
           font = "Arial",
           width = width, 
-          height = height, 
+          height = height/2, 
           bg = "transparent")
 
 #Biological Process of total 
@@ -403,6 +410,7 @@ graph2pdf(x = plot03_BP_total,
           height = height, 
           bg = "transparent")
 
+## MF average
 data1 <- anno_filtered[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Molecular Function")]
 names(data1)[names(data1) == "Molecular Function"] <- "Molecular.Function"
 ####View(data1)
@@ -455,13 +463,14 @@ plot03_MF_avg <- ggplot(data2, aes(x=`MF`, y=value, fill=condition)) +
         panel.grid.major = element_blank(),
         plot.background = element_rect(fill = "transparent",colour = NA))+
   scale_fill_manual(values = color_4[c(2,4)]) + 
-  mytheme
+  mytheme + 
+  theme(legend.position = "none")
 figure_name <- paste0(figure_path, "03_Molecular.Function_avg.pdf")
 graph2pdf(x = plot03_MF_avg,
           file=figure_name,
           font = "Arial",
           width = width, 
-          height = height,
+          height = height/2,
           bg = "transparent")
 
 a$DL <- apply(data.frame(a$DL1,a$DL2,a$DL3), 1, mean,na.rm=T)
@@ -528,8 +537,11 @@ plot04_pie_DL <- ggstatsplot::ggpiestats(DL_mat_naomit, x = 'Category',
                         title = NULL,
                         legend.title = NULL) + 
   mytheme
-#graph2ppt(file="03_D_pie.pptx")
-figure_name <- paste0(figure_path,"04_D_pie.pdf")
+graph2ppt(file=paste0(figure_path,"05_D_pie_v2.pptx"),
+          width = width, 
+          height = height, 
+          bg = "transparent")
+figure_name <- paste0(figure_path,"05_D_pie_v2.pdf")
 graph2pdf(x=plot04_pie_DL,
           file=figure_name,
           font = "Arial",
@@ -554,9 +566,9 @@ plot04_pie_M <- ggstatsplot::ggpiestats(ML_mat_naomit,
                         direction = 1, #1为顺时针方向，-1为逆时针方向
                         palette = 'Pastel2', #设置调色板
                         title = NULL) + 
-  mytheme
-#graph2ppt(file="03_M_pie.pptx.pptx")
-figure_name <- paste0(figure_path,"04_M_pie.pdf")
+  theme(legend.position = "none")
+graph2ppt(file=paste0(figure_path,"05_M_pie.pptx"))
+figure_name <- paste0(figure_path,"05_M_pie.pdf")
 graph2pdf(x=plot04_pie_M,
           file=figure_name,
           font = "Arial",
@@ -640,11 +652,11 @@ ggplot(ML_DL_count, aes(x=name, y=count, fill=Category))+
   theme(axis.text.y = element_text(face = "bold",size = 10)) + 
   theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid')) + 
   theme(axis.text.x = element_text(face = "bold",size = 10))+ 
-  mytheme
-figure_name <- paste0(figure_path,"04_M_DL_barplot_v2.pdf")
+  mytheme + theme(legend.position = "none")
+figure_name <- paste0(figure_path,"05_M_DL_barplot_v2.pdf")
 graph2pdf(file=figure_name,
           font = "Arial",
-          width = width, 
+          width = width2, 
           height = height, 
           bg = "transparent")
 
@@ -690,16 +702,15 @@ ggplot(data_GroupByID, aes(x = 2, y = count, fill = label)) +
   coord_polar(theta = "y", start = 0)+
   labs(x = '', y = '', title = '') + 
   theme_void()+
-  theme(legend.position = "top",
-        legend.direction = 'vertical') +
+  theme(legend.position = "none") +
   scale_fill_manual(name="Percentage",values = c('#B25751','#5A80B8','#A1BA66','#7C659E','#65AAC3')) +
   xlim(0.5, 2.5) 
 
 figure_name <- paste0(figure_path,"04_D_pie_subcell1.pdf")
 graph2pdf(file=figure_name,
           font = "Arial",
-          width = width, 
-          height = height, 
+          width = width/2, 
+          height = height/2, 
           bg = "transparent")
 #graph2ppt(file="./04_Output/Version3/10_D_pie_subcell.pptx")
 # graph2pdf(file="./04_Output/Version3/10_D_pie_subcell1.pdf",aspectr=2, font = "Arial",
@@ -747,14 +758,14 @@ ggplot(data_GroupByID, aes(x = 2, y = count, fill = label)) +
   coord_polar(theta = "y", start = 0)+
   labs(x = '', y = '', title = '') + 
   theme_void()+
-  theme(legend.position = "top",legend.direction = "vertical") +
+  theme(legend.position = "none") +
   scale_fill_manual(name="Percentage",values = c('#B25751','#5A80B8','#A1BA66','#7C659E','#65AAC3')) +
   xlim(0.5, 2.5)
 figure_name <- paste0(figure_path,"04_M_pie_subcell1.pdf")
 graph2pdf(file=figure_name,
           font = "Arial",
-          width = width, 
-          height = height, 
+          width = width/2, 
+          height = height/2, 
           bg = "transparent")
 # graph2ppt(file="./04_Output/Version3/10_M_pie_subcell.pptx")
 # graph2pdf(file="./04_Output/Version3/10_M_pie_subcell1.pdf",aspectr=2, font = "Arial",
@@ -774,12 +785,13 @@ ggplot(ML_DL_count, aes(x=name, y=count, fill=label))+
   theme(axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
   theme(axis.text.y = element_text(face = "bold",size = 10)) + 
   theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid')) + 
-  theme(axis.text.x = element_text(face = "bold",size = 10))  + mytheme
-figure_name <- paste0(figure_path,"04_M_L_pie_subcell1.pdf")
+  theme(axis.text.x = element_text(face = "bold",size = 10))  + mytheme 
+  #theme(legend.position = "none")
+figure_name <- paste0(figure_path,"04_M_L_pie_subcell1_withlegend.pdf")
 graph2pdf(file=figure_name,
           font = "Arial",
           width = width, 
-          height = height, 
+          height = height/2, 
           bg = "transparent")
 # graph2pdf(file="./04_Output/Version3/10_M_L_pie_subcell.pdf",aspectr=2, font = "Arial",
 #           width = 7, height = 3, bg = "transparent")
@@ -805,7 +817,7 @@ plot05_abundance <- ggplot(data3, aes(x=Category, y=value, fill=condition)) +
            colour="black", # Use black outlines,
            size=.3) +      # Thinner lines
   coord_flip() +
-  scale_fill_manual(values = color_4[c(2,4)]) + 
+  scale_fill_manual(values = alpha(color_4[c(2,4)],alpha = 0.3)) + 
   theme_classic()+
   theme(panel.background = element_rect(fill = "transparent",colour = NA),
         panel.grid.minor = element_blank(),
@@ -814,7 +826,7 @@ plot05_abundance <- ggplot(data3, aes(x=Category, y=value, fill=condition)) +
   theme(legend.position="right")+ 
   guides(fill=guide_legend("Condition")) + 
   mytheme
-figure_name <- paste0(figure_path,"05_Extracellular_protein_abundance.pdf")
+figure_name <- paste0(figure_path,"06_Extracellular_protein_abundance.pdf")
 graph2pdf(x = plot05_abundance,
           file=figure_name,
           font = "Arial",
@@ -861,11 +873,11 @@ heatmap_col <- c("#05030d","#f9f998")
 plot7.1_wholeheatmap <- pheatmap(merge_na_heatmap[,1:6],cluster_cols = F,
          cluster_rows = F,
          annotation_col = annotation_col,
-         show_rownames = F,fontsize_row = 5,
+         show_rownames = T,fontsize_row = 5,
          annotation_row = annotation_row,
          color = colorRampPalette(c("white","#67001F"))(15),
          gaps_row = c(23,87,96,134,156),
-         cellwidth = 20,cellheight = 3,
+         cellwidth = 20,cellheight = 5,
          #main = "Heatmap of gene expression",
          na_col = "grey",
          border_color = "black",
@@ -1000,17 +1012,17 @@ graph2pdf(x = plot08_volcano,
           bg = "transparent")
   
 ## 9-Ribbon plot for DLsignal but notMsignal####
-sheet2 <- readxl::read_xlsx("./4.1_ECM数据分析项目_原始数据_20201231/DL_noMl.xlsx",sheet = 2)
+sheet2 <- readxl::read_xlsx("./4.1_ECM数据分析项目_原始数据_20201231/Table2 Biological functions of proteins out of Matrisome in DL-ECM.xlsx",sheet = 2)
 sheet2 <- sheet2[!is.na(sheet2$`Gene name`),]
 sheet2 <- sheet2[-grep("--",sheet2$`Gene name`),]
 sheet2 <- sheet2[,c(1,3)]
 
-regu_cell <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/DL_noMl.xlsx",sheet = 3)
-regu_expr <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/DL_noMl.xlsx",sheet = 4)
-transfer <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/DL_noMl.xlsx",sheet = 5)
-sign_transduct <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/DL_noMl.xlsx",sheet = 6)
-metabolism <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/DL_noMl.xlsx",sheet = 7)
-biosynthesis <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/DL_noMl.xlsx",sheet = 8)
+regu_cell <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/Table2 Biological functions of proteins out of Matrisome in DL-ECM.xlsx",sheet = 3)
+regu_expr <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/Table2 Biological functions of proteins out of Matrisome in DL-ECM.xlsx",sheet = 4)
+transfer <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/Table2 Biological functions of proteins out of Matrisome in DL-ECM.xlsx",sheet = 5)
+sign_transduct <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/Table2 Biological functions of proteins out of Matrisome in DL-ECM.xlsx",sheet = 6)
+metabolism <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/Table2 Biological functions of proteins out of Matrisome in DL-ECM.xlsx",sheet = 7)
+biosynthesis <- readxl::read_xlsx("4.1_ECM数据分析项目_原始数据_20201231/Table2 Biological functions of proteins out of Matrisome in DL-ECM.xlsx",sheet = 8)
 
 regu_cell$class <- rep("Cell_regulation",nrow(regu_cell))
 regu_expr$class <- rep("Expression_regulation",nrow(regu_expr))
@@ -1080,7 +1092,8 @@ r_all <- makeRiver(nodes_all, edges_all)
 op <- par(cex=0.8)
 plot09.1_riverplot_v2 <- riverplot( r_all,srt=0,lty=0,textcel=1,
            nodewidth = 1,node_margin = 0.1,
-           cex=0.2,plot_area = 0.9)
+           cex=0.2,plot_area = 0.9) + 
+  scale_colour_manual(values = my36colors)
 figure_name <- paste0(figure_path,"9.1_riverplot_v2.pdf")
 graph2pdf(
           file=figure_name,
@@ -1089,31 +1102,37 @@ graph2pdf(
           height = height*2, 
           bg = "transparent")
 
-# library(RColorBrewer)
-# display.brewer.all()
-# set3= brewer.pal(n=6,name = "Set3")
-# nodes_all$col[2:7] <- set3
-# r_all <- makeRiver(nodes_all, edges_all)
-# op <- par(cex=0.8)
-# riverplot( r_all,srt=0,lty=0,textcel=1,
-#            nodewidth = 1,node_margin = 0.1,
-#            cex=0.2,plot_area = 0.9)
-# graph2pdf(file="4.4_ECM数据分析项目_图片输出_20210120_figure/Version3/10_riverPlot_v3.pdf",aspectr=2, font = "Arial",
-#           width = 10, height = 8, bg = "transparent")
+## different set
+library(RColorBrewer)
+display.brewer.all()
+set3= brewer.pal(n=6,name = "Set3")
+nodes_all$col[2:7] <- set3
+r_all <- makeRiver(nodes_all, edges_all)
+op <- par(cex=0.8)
+plot09.1_riverplot_v3 <- riverplot( r_all,srt=0,lty=0,textcel=1,
+           nodewidth = 1,node_margin = 0.1,
+           cex=0.2,plot_area = 0.9)
+figure_name <- paste0(figure_path,"9.1_riverplot_v3.pdf")
+graph2pdf(
+  file=figure_name,
+  font = "Arial",
+  width = width2, 
+  height = height*2, 
+  bg = "transparent")
 
 ## 10-GeomSplitViolin in Glycoproteins####
 
-ECM_Glyco_function <- read_excel("./4.1_ECM数据分析项目_原始数据_20201231/Fig5核心分类_ECM糖蛋白与蛋白聚糖_生物学过程分类_v2.0_20210521.xlsx")
+ECM_Glyco_function <- read_excel("./4.1_ECM数据分析项目_原始数据_20201231/Table3 Biological Function of ECM Glycoproteins.xlsx")
 ECM_Glyco_function <- ECM_Glyco_function[,c(1,2)]
-colnames(ECM_Glyco_function) <- c("Function","genename")
-ECM_Glyco_function$Function[grep(pattern = "TGF",ECM_Glyco_function$Function)] <- "TGFβ"
-load("/Users/yujijun/Documents/work/4_ECM数据分析项目_20201120_/4.3_ECM数据分析项目_输出结果_20210120/output_v1/category_genename_deletena.RData")
+colnames(ECM_Glyco_function) <- c("feature","genename")
+ECM_Glyco_function$feature[grep(pattern = "TGF",ECM_Glyco_function$feature)] <- "TGFβ"
+#load("/Users/yujijun/Documents/work/4_ECM数据分析项目_20201120_/4.3_ECM数据分析项目_输出结果_20210120/output_v1/category_genename_deletena.RData")
 ECM_Glyco_expre <- merge_na %>% filter(Category == "ECM Glycoproteins")
 
 ECM_Glyco_all <- right_join(x = ECM_Glyco_function,
                             y = ECM_Glyco_expre,
                             by = c("genename" = "Gene name"))
-ECM_Glyco_all <- ECM_Glyco_all[!is.na(ECM_Glyco_all$Function),1:8]
+ECM_Glyco_all <- ECM_Glyco_all[!is.na(ECM_Glyco_all$feature),1:8]
 
 #### wigth to long
 ECM_Glyco_all_long <- ECM_Glyco_all %>%  
@@ -1125,17 +1144,19 @@ ECM_Glyco_all_long <- ECM_Glyco_all %>%
 ECM_Glyco_all_long$group <- "Matrigel"
 ECM_Glyco_all_long$group[grep(pattern = "DL",x=ECM_Glyco_all_long$sample)] <- "DL"
 ECM_Glyco_all_long <- ECM_Glyco_all_long[!is.na(ECM_Glyco_all_long$expression),]
+ECM_Glyco_all_long$feature <- str_to_title(ECM_Glyco_all_long$feature)
 ECM_Glyco_all_long_summary <- summarySE(ECM_Glyco_all_long, 
                                         measurevar="expression", 
-                                        groupvars=c("Function","genename","group"))
+                                        groupvars=c("feature","genename","group"))
 
 source("/Users/yujijun/Documents/Code_library/Script/Visualization/geom_split_violin.R")
-
+ggboxplot(ECM_Glyco_all_long, x = "feature", y = "expression", fill = "group",
+          palette = c("#00AFBB", "#E7B800"))
 # 自行调整下面的参数
 
-plot10_split_violin <- ggplot(ECM_Glyco_all_long,aes(x= Function,y= expression,fill= group))+
+plot10_split_violin <- ggplot(ECM_Glyco_all_long,aes(x= feature,y= expression,fill= group))+
   geom_split_violin(trim= F,color="white",scale = "area") + #绘制分半的小提琴图
-  geom_point(data = ECM_Glyco_all_long_summary,aes(x= Function, y= expression),pch=19,
+  geom_point(data = ECM_Glyco_all_long_summary,aes(x= feature, y= expression),pch=19,
              position=position_dodge(0.5),size= 1)+ #绘制均值为点图
   # geom_errorbar(data = ECM_Glyco_all_long_summary,aes(ymin = expression-ci, ymax= expression+ci), 
   #               width= 0.05, 
@@ -1146,19 +1167,26 @@ plot10_split_violin <- ggplot(ECM_Glyco_all_long,aes(x= Function,y= expression,f
   scale_fill_manual(values = color_4[c(2,4)])+ 
   #scale_fill_manual(values = col_convert) + 
   labs(y=("gene expression"),x=NULL,title = "ECM Glygoproteins") + 
-  theme_bw()+ mytheme +
+  theme_bw() + 
   stat_compare_means(aes(group = group),
                      label = "p.signif",
                      method = "anova",
                      label.y = max(ECM_Glyco_all_long$expression),
-                     hide.ns = T) + 
-  mytheme
+                     hide.ns = T) + mytheme + 
+  theme(axis.text.x = element_text(angle =270,face = "bold",hjust = 0)) +
+  theme(legend.text = element_text(size = 12,face = "bold"),
+        legend.title = element_text(size = 12,face = "bold")) + 
+  xlab("Molecular Function") + 
+  ylab("Gene Expression") + 
+  theme(plot.title = element_blank())
+  
+  #mytheme
 figure_name <- paste0(figure_path,"10_split_violin.pdf")
 graph2pdf(x = plot10_split_violin,
           file=figure_name,
           font = "Arial",
-          width = width2, 
-          height = height, 
+          width = width2*2/3, 
+          height = height*2, 
           bg = "transparent")
 output_name <- paste0(output_path,"01_ECM_Glyco_all_long_20210518_v1.RData")
 save(ECM_Glyco_all_long,file = output_name)
@@ -1212,15 +1240,16 @@ plot11_bubble <- ggplot(merge_na_hehe_long_summary,aes(x=sample,y=expression)) +
   theme_classic() +
   theme(axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
         axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'),
-        axis.text.x = element_text(colour="grey20",size=12,angle=0,hjust=.5,vjust=0,face="plain"),
-        axis.text.y = element_text(colour="grey20",size=12,angle=0,hjust=1,vjust=0,face="plain"))
+        axis.text.x = element_text(colour="grey20",size=24,angle=270,face="bold"),
+        axis.text.y = element_text(colour="grey20",size=24,face="bold",hjust = 2),
+        axis.title = element_text(face = "bold",size = 24)) 
 #graph2ppt(file="/03 discussion/Bubble_Plotformatrigel1.pptx")
 figure_name <- paste0(figure_path,"11_bubble_plot.pdf")
 graph2pdf(x = plot11_bubble,
           file=figure_name,
           font = "Arial",
           width = width2, 
-          height = height*2, 
+          height = width2, 
           bg = "transparent")
 
 
@@ -1235,7 +1264,7 @@ ECM.collagen.GO.BP$group <- "GO.BP"
 ECM.collagen.GO.MF <- read.delim(file = "./4.3_ECM数据分析项目_输出结果_20210120/output_last/ECM_enrichment.Function_20210527.tsv")
 ECM.collagen.GO.MF <- ECM.collagen.GO.MF[2,]
 ECM.collagen.GO.MF$group <- "GO.MF"
-ECM.collagen.Uniprot <- read.delim(file = "./4.3_ECM数据分析项目_输出结果_20210120/output_last/ECM_enrichment.Keyword_Uniprot.tsv")
+ECM.collagen.Uniprot <- read.delim(file = "./4.3_ECM数据分析项目_输出结果_20210120/output_last/ECM_enrichment.Keyword_Uniprot_20210527.tsv")
 ECM.collagen.Uniprot <- ECM.collagen.Uniprot[10,]
 ECM.collagen.Uniprot$group <- "Uniprot"
 ECM.collagen.enrichall <- bind_rows(ECM.collagen.KEGG,
@@ -1255,10 +1284,20 @@ plot12_String_enrichresult <-
           x.text.angle=90,
           size = 1) + 
   scale_color_manual(values = my36colors[c(1,2,6,4)]) + 
-  theme(legend.key.size = unit(1, 'cm'), #change legend key size
+  mytheme + 
+  theme(axis.text = element_text(size = 6)) + 
+  theme(legend.key.size = unit(0.5, 'cm'), #change legend key size
         legend.key.height = unit(0.5, 'cm'), #change legend key height
-        legend.key.width = unit(1, 'cm')) #change legend key width) 
-figure_name <- paste0(figure_path,"12_String_enrichresult.pdf")
+        legend.key.width = unit(1, 'cm'))  + 
+  theme(axis.text = element_text(size=10)) + 
+  xlab("Function Description") + 
+  ylab("Obversed Protein Number") +
+  theme(legend.text = element_text(size = 8,face = "bold"),
+        legend.title = element_text(size = 10,face = "bold")) 
+  
+figure_name <- paste0(figure_path,"12_String_enrichresult.pdf") 
+graph2ppt(x = plot12_String_enrichresult,
+          file=paste0(figure_path,"12_String_enrichresult.pptx"))
 graph2pdf(x = plot12_String_enrichresult,
           file=figure_name,
           font = "Arial",
@@ -1273,7 +1312,7 @@ library(forcats)
 library(enrichplot)
 library(clusterProfiler)
 library(clusterProfiler.dplyr)
-
+load("./4.3_ECM数据分析项目_输出结果_20210120/output_last/RNAseq_allEnrich_20210528.RData")
 base_path <- "/Users/yujijun/Documents/work/4_ECM数据分析项目_20201120_/4.1_ECM数据分析项目_原始数据_20201231/测序数据_version3"
 setwd(base_path)
 setwd('./1.deglist/DL_d5vsM_d5/')
@@ -1286,25 +1325,76 @@ GO.MF <- enrichGO(gene.df$ENTREZID,ont = "MF",OrgDb = org.Hs.eg.db)
 GO.CC <- enrichGO(gene.df$ENTREZID,ont = "CC",OrgDb = org.Hs.eg.db)
 GO.BP <- enrichGO(gene.df$ENTREZID,ont = "BP",OrgDb = org.Hs.eg.db)
 KEGG <- enrichKEGG(gene.df$ENTREZID,organism = "hsa")
-
-GO.MF.test <- filter(GO.MF, p.adjust < .05, qvalue < 0.2)
-GO.MF.result <- GO.MF.test@result
+save(GO.MF,GO.CC,GO.BP,KEGG, file = "4.3_ECM数据分析项目_输出结果_20210120/output_last/RNAseq_allEnrich_20210528.RData")
+# GO.MF.test <- filter(GO.MF, p.adjust < .05, qvalue < 0.2)
+# GO.MF.result <- GO.MF.test@result
 GO.BP.test <- filter(GO.BP, p.adjust < .05, qvalue < 0.2)
 GO.BP.result <- GO.BP.test@result
-GO.BP.test@result <- GO.BP.result[grep(pattern = "vascu",GO.BP.result$Description),]
-KEGG.test <- filter(KEGG, p.adjust < .05, qvalue < 0.2)
-KEGG.result <- KEGG@result
-write_tsv(KEGG.result,file = "4.3_ECM数据分析项目_输出结果_20210120/output_last/RNAseq_KEGG.result.tsv")
-y <- mutate(KEGG.test, richFactor = Count / as.numeric(sub("/\\d+", "", BgRatio)))
-ggplot(y, showCategory = 30, 
+GO.BP.result <- GO.BP.result[grep(pattern = "vascu|tyrosine kinase activity|angiogenesis|collagen|MAP kinase activity|epidermal growth factor receptor signaling pathway|fibroblast growth factor receptor signaling pathway|regulation of ERK1 and ERK2 cascade|epithelial cell proliferation involved in liver morphogenesis|hepat|liver",GO.BP.result$Description),]
+#GO.BP.result <- GO.BP.result[grep("negetive")]
+rownames(GO.BP.result) <- 1:nrow(GO.BP.result)
+GO.BP.result <- GO.BP.result[-c(1,2,3,5,14,30,32),]
+GO.BP.test@result <- GO.BP.result
+GO.BP.tyrosine <- GO.BP.result[grep("tyrosine",GO.BP.result$Description),] 
+
+#write_tsv(KEGG.result,file="./4.3_ECM数据分析项目_输出结果_20210120/output_last/KEGG.test.20210528.tsv")
+#write_tsv(KEGG.result,file = "4.3_ECM数据分析项目_输出结果_20210120/output_last/RNAseq_KEGG.result.tsv")
+y <- mutate(GO.BP.test, richFactor = Count / as.numeric(sub("/\\d+", "", BgRatio)))
+Plot13_GO.BP <- ggplot(y, showCategory = 40, 
        aes(richFactor, fct_reorder(Description, richFactor))) + 
   geom_segment(aes(xend=0, yend = Description)) +
   geom_point(aes(color=p.adjust, size = Count)) +
   scale_color_viridis_c(guide=guide_colorbar(reverse=TRUE)) +
   scale_size_continuous(range=c(2, 10)) +
   theme_minimal() + 
-  xlab("rich factor") +
+  xlab("Rich Factor") +
   ylab(NULL) + 
-  ggtitle("Enriched KEGG Biological Process")
+  #ggtitle("Enriched GO Biological Process") + 
+  mytheme + 
+  theme(axis.text = element_text(size = 8)) + 
+  theme(legend.position = c(0.8,0.4)) + 
+  theme(axis.text = element_text(face = "bold",size = 8)) +
+  ggtitle("Biological Process in GO") + 
+  theme(plot.title = element_text(face = "bold",size = 12)) + 
+  theme(legend.text = element_text(face = "bold",size = 8),
+        legend.title = element_text(face = "bold",size = 10)) 
 
+figure_name <- paste0(figure_path,"13_GO.BP.pdf")
+graph2pdf(x = Plot13_GO.BP,
+          file=figure_name,
+          font = "Arial",
+          width = width2*1.2, 
+          height = height*2, 
+          bg = "transparent")
 
+KEGG.test <- filter(KEGG, p.adjust < .05, qvalue < 0.2)
+KEGG.result <- KEGG.test@result
+deleted_row <- c(5,9,11,12,13,16,17,19,20,24,26:36,40,43,44) -1 
+KEGG.result <- KEGG.result[-deleted_row,]
+KEGG.test@result <- KEGG.result
+y <- mutate(KEGG.test, richFactor = Count / as.numeric(sub("/\\d+", "", BgRatio)))
+Plot13_KEGG <- ggplot(y, showCategory = 40, 
+                       aes(richFactor, fct_reorder(Description, richFactor))) + 
+  geom_segment(aes(xend=0, yend = Description)) +
+  geom_point(aes(color=p.adjust, size = Count)) +
+  scale_color_viridis_c(guide=guide_colorbar(reverse=TRUE)) +
+  scale_size_continuous(range=c(2, 10)) +
+  theme_minimal() + 
+  xlab("Rich Factor") +
+  ylab(NULL) + 
+  #ggtitle("Enriched GO Biological Process") + 
+  mytheme + 
+  theme(axis.text = element_text(size = 8)) + 
+  theme(legend.position = c(0.8,0.4)) + 
+  theme(axis.text = element_text(face = "bold",size = 8)) +
+  ggtitle("Enrichment of KEGG") + 
+  theme(plot.title = element_text(face = "bold",size = 12)) + 
+  theme(legend.text = element_text(face = "bold",size = 8),
+        legend.title = element_text(face = "bold",size = 10)) 
+figure_name <- paste0(figure_path,"13_KEGG.pdf")
+graph2pdf(x = Plot13_KEGG,
+          file=figure_name,
+          font = "Arial",
+          width = width2, 
+          height = height*1.5, 
+          bg = "transparent")

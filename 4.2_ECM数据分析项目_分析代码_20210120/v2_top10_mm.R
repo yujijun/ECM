@@ -1,5 +1,6 @@
 library(ggplot2)
 library(export)
+#### ECM regulators
 data1 <- merge_orig_ref_filter[,c("DL1","DL2","DL3","Matrigel1","Matrigel2","Matrigel3","Category","Gene name")]
 data1$DL <- apply(data.frame(data1$DL1,data1$DL2,data1$DL3), 1, mean,na.rm=T)
 data1$Matrigel <- apply(data.frame(data1$Matrigel1,data1$Matrigel2,data1$Matrigel3), 1, mean,na.rm=T)
@@ -7,7 +8,7 @@ data1$Matrigel <- apply(data.frame(data1$Matrigel1,data1$Matrigel2,data1$Matrige
 data2 = data1[which(data1$Category =='ECM Regulators'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
 data2 <- data2[c(1:10),]
-data2$DL <- round(data2$DL,2)
+data2$DL <- round(data2$DL,1)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
   geom_bar(fill = '#96CDCD', stat="identity",position=position_dodge(0.7),width=0.5) +
@@ -26,11 +27,11 @@ ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid')) + 
-  theme(axis.text.y = element_text(face = "bold",size = 10)) + 
-  theme(legend.position = "none")
+  theme(axis.text.y = element_text(face = "bold",size = 8)) + 
+  theme(legend.position = "none") 
 #graph2ppt(file="06_DL_ECM Regulators2.pptx")
-graph2pdf(file="04_Output/Version2/top18_v2/06_DL_ECM Regulators.pdf",aspectr=2,
-          width = 5, height = 2.5, bg = "transparent")
+graph2pdf(file="06_DL_ECM Regulators.pdf",aspectr=NULL,
+          width = width, height = height, bg = "transparent")
 
 datann <- data1[which(data1$`Gene name`%in% c('Tgm2','Loxl1','Adamtsl4','F13b','Ambp','Serpinb6a','Hrg','Plg','Htra1','Lox')),]
 data2 <- datann[order(datann$Matrigel,decreasing = T),]
@@ -54,8 +55,8 @@ ggplot(data=data2, aes(x=`Gene name`, y=Matrigel)) +
         axis.ticks.x=element_blank(),
         axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
 
-graph2pdf(file="06_M_ECM Regulators_samegene.pdf",aspectr=2, font = "Arial",
-          width = 10, height = 2.5, bg = "transparent")
+graph2pdf(file="06_M_ECM Regulators_samegene.pdf", font = "Arial",
+          width = width, height = height, bg = "transparent")
 
 data2 = data1[which(data1$Category =='ECM Regulators'),]
 data2 <- data2[order(data2$Matrigel,decreasing = T),]
@@ -87,7 +88,7 @@ graph2pdf(file="06_M_ECM Regulators.pdf",aspectr=2, font = "Arial",
 data2 = data1[which(data1$Category =='Secreted Factors'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
 data2 <- data2[c(1:8),]
-data2$DL <- round(data2$DL,2)
+data2$DL <- round(data2$DL,1)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
   geom_bar(fill = '#9ACD32', stat="identity",position=position_dodge(0.7),width=0.5) +
@@ -165,7 +166,7 @@ graph2pdf(file="06_M_Secreted Factors.pdf",aspectr=2, font = "Arial",
 data2 = data1[which(data1$Category =='ECM-affiliated Proteins'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
 data2 <- data2[c(1:10),]
-data2$DL <- round(data2$DL,2)
+data2$DL <- round(data2$DL,1)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
   geom_bar(fill = "#292985", stat="identity",position=position_dodge(0.7),width=0.5) +
@@ -246,7 +247,7 @@ graph2pdf(file="06_M_ECM-affiliated Proteins.pdf",aspectr=2, font = "Arial",
 data2 = data1[which(data1$Category =='Proteoglycans'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
 data2 <- data2[c(1:9),]
-data2$DL <- round(data2$DL,2)
+data2$DL <- round(data2$DL,1)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
   geom_bar(fill = '#007799', stat="identity",position=position_dodge(0.7),width=0.5) +
@@ -325,7 +326,7 @@ graph2pdf(file="06_M_Proteoglycans.pdf",aspectr=2, font = "Arial",
 data2 = data1[which(data1$Category =='ECM Glycoproteins'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
 data2 <- data2[c(1:10),]
-data2$DL <- round(data2$DL,2)
+data2$DL <- round(data2$DL,1)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
   geom_bar(fill = '#CDCD00', stat="identity",position=position_dodge(0.7),width=0.5) +
@@ -402,7 +403,7 @@ graph2pdf(file="06_M_ECM Glycoproteins.pdf",aspectr=2, font = "Arial",
 data2 = data1[which(data1$Category =='Collagens'),]
 data2 <- data2[order(data2$DL,decreasing = T),]
 data2 <- data2[c(1:10),]
-data2$DL <- round(data2$DL,2)
+data2$DL <- round(data2$DL,1)
 data2$`Gene name` <- reorder(data2$`Gene name`,data2$DL)
 ggplot(data=data2, aes(x=`Gene name`, y=DL)) +
   geom_bar(fill = '#CD919E', stat="identity",position=position_dodge(0.7),width=0.5) +
